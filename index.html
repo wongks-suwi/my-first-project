@@ -38,11 +38,14 @@
   <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-5 4 4 3-3 4 4"/></symbol>
   <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12,2 14.9,8.6 22,9.3 16.6,14 18.2,21 12,17.3 5.8,21 7.4,14 2,9.3 9.1,8.6" fill="currentColor" stroke="none"/></symbol>
 </svg>
 
 <!-- ================= ฉากหลัง London Christmas (SVG + CSS ล้วน) ================= -->
-<div class="scene" aria-hidden="true">
+<div class="scene" aria-hidden="true" data-scene="london">
+  <!-- ===== ฉาก: ถนนลอนดอน (ฉากเดิม) ===== -->
+  <div class="set set-london">
   <div class="stars"></div>
   <div class="stars s2"></div>
   <div class="moon"></div>
@@ -213,12 +216,463 @@
     </g>
   </svg>
 
-  <div id="snow" class="snow"></div>
-
   <!-- สายไฟประดับด้านบน (หลอดไฟสร้างจาก JS) -->
   <svg id="lights" class="lights" viewBox="0 0 1200 110" preserveAspectRatio="xMidYMin slice">
     <path d="M-20 12Q100 74 220 12Q340 74 460 12Q580 74 700 12Q820 74 940 12Q1060 74 1180 12Q1300 74 1420 12" fill="none" stroke="#0a1230" stroke-width="2.2"/>
   </svg>
+  </div>
+
+  <!-- ===== ฉาก: หน้าต่างหิมะ (ริมหน้าต่างอบอุ่น มองเห็นป่าสนหิมะ) ===== -->
+  <div class="set set-window">
+    <svg class="art" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="w-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4c3623"/><stop offset=".55" stop-color="#8d6a43"/><stop offset="1" stop-color="#5a3f27"/></linearGradient>
+        <radialGradient id="w-wallGlow" cx=".3" cy=".4" r=".55"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".5"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient>
+        <linearGradient id="w-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9c6d4"/><stop offset=".6" stop-color="#8296ab"/><stop offset="1" stop-color="#d4dde8"/></linearGradient>
+        <linearGradient id="w-pineG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#46665f"/><stop offset="1" stop-color="#22383a"/></linearGradient>
+        <linearGradient id="w-fog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe7f0" stop-opacity="0"/><stop offset="1" stop-color="#dfe7f0" stop-opacity=".55"/></linearGradient>
+        <radialGradient id="w-glow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".85"/><stop offset=".45" stop-color="#ffb347" stop-opacity=".25"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+        <pattern id="w-stitch" width="18" height="16" patternUnits="userSpaceOnUse"><path d="M2 3l7 8 7-8" fill="none" stroke="#c4b39a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></pattern>
+        <clipPath id="w-glassClip"><rect x="410" y="70" width="800" height="640"/></clipPath>
+        <!-- ต้นสนหิมะ (ฐานอยู่ที่ 0,0 สูงขึ้นไปทางลบ) -->
+        <g id="w-pine">
+          <rect x="-6" y="-12" width="12" height="18" fill="#3a2d28"/>
+          <polygon points="0,-205 20,-137 -20,-137" fill="url(#w-pineG)"/>
+          <polygon points="0,-175 31,-107 -31,-107" fill="url(#w-pineG)"/>
+          <polygon points="0,-145 42,-77 -42,-77" fill="url(#w-pineG)"/>
+          <polygon points="0,-115 53,-47 -53,-47" fill="url(#w-pineG)"/>
+          <polygon points="0,-85 64,-17 -64,-17" fill="url(#w-pineG)"/>
+          <polygon points="0,-55 75,13 -75,13" fill="url(#w-pineG)"/>
+          <path d="M0 -205L12 -163Q8 -171 4 -160Q0 -170 -4 -160Q-8 -171 -12 -163Z" fill="#f4f8ff"/>
+          <path d="M0 -175L19 -133Q12 -141 6 -130Q0 -140 -6 -130Q-12 -141 -19 -133Z" fill="#f4f8ff"/>
+          <path d="M0 -145L26 -103Q16 -111 8 -100Q0 -110 -8 -100Q-16 -111 -26 -103Z" fill="#f4f8ff"/>
+          <path d="M0 -115L33 -73Q20 -81 10 -70Q0 -80 -10 -70Q-20 -81 -33 -73Z" fill="#f4f8ff"/>
+          <path d="M0 -85L40 -43Q24 -51 12 -40Q0 -50 -12 -40Q-24 -51 -40 -43Z" fill="#f4f8ff"/>
+          <path d="M0 -55L46 -13Q28 -21 14 -10Q0 -20 -14 -10Q-28 -21 -46 -13Z" fill="#f4f8ff"/>
+        </g>
+        <g id="w-cane">
+          <path d="M0 0V-70q0-26 22-26q22 0 22 26" fill="none" stroke="#d6202f" stroke-width="9" stroke-linecap="round"/>
+          <path d="M0 0V-70q0-26 22-26q22 0 22 26" fill="none" stroke="#fff" stroke-width="9" stroke-dasharray="7 11"/>
+        </g>
+        <g id="w-arm"><path d="M0 0V-48M-10 -34L0 -24L10 -34"/></g>
+        <g id="w-flake" stroke="#5a4638" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+          <use href="#w-arm"/><use href="#w-arm" transform="rotate(60)"/><use href="#w-arm" transform="rotate(120)"/>
+          <use href="#w-arm" transform="rotate(180)"/><use href="#w-arm" transform="rotate(240)"/><use href="#w-arm" transform="rotate(300)"/>
+        </g>
+      </defs>
+
+      <!-- ผนังห้อง -->
+      <rect width="1600" height="1000" fill="url(#w-wall)"/>
+      <rect width="1600" height="1000" fill="url(#w-wallGlow)"/>
+
+      <!-- ส่วนหน้าต่างทั้งหมดเลื่อนไปทางขวา เพื่อไม่ให้แผงควบคุมบังบนจอกว้าง -->
+      <g transform="translate(330 0)">
+      <!-- วิวนอกหน้าต่าง: ป่าสนหิมะ -->
+      <g clip-path="url(#w-glassClip)">
+        <rect x="410" y="70" width="800" height="640" fill="url(#w-sky)"/>
+        <g opacity=".5">
+          <use href="#w-pine" transform="translate(470 640) scale(1.3)"/><use href="#w-pine" transform="translate(640 650) scale(1.1)"/>
+          <use href="#w-pine" transform="translate(760 640) scale(1.4)"/><use href="#w-pine" transform="translate(960 650) scale(1.2)"/>
+          <use href="#w-pine" transform="translate(1080 640) scale(1.5)"/><use href="#w-pine" transform="translate(1190 650) scale(1.1)"/>
+        </g>
+        <path d="M410 640Q600 612 820 632T1210 622V710H410Z" fill="#e9eff7"/>
+        <g fill="#7a766f" opacity=".75">
+          <rect x="700" y="596" width="6" height="40"/><rect x="760" y="598" width="6" height="40"/><rect x="820" y="600" width="6" height="40"/>
+          <rect x="880" y="598" width="6" height="40"/><rect x="940" y="596" width="6" height="40"/>
+          <rect x="696" y="606" width="250" height="6"/><rect x="696" y="624" width="250" height="6"/>
+        </g>
+        <g fill="#f4f8ff" opacity=".9"><rect x="694" y="600" width="254" height="5" rx="2.5"/><rect x="694" y="618" width="254" height="4" rx="2"/></g>
+        <use href="#w-pine" transform="translate(840 706) scale(2.0)"/>
+        <use href="#w-pine" transform="translate(520 740) scale(2.9)"/>
+        <use href="#w-pine" transform="translate(1130 740) scale(3.2)"/>
+        <rect x="410" y="70" width="800" height="640" fill="url(#w-fog)"/>
+      </g>
+
+      <!-- กรอบหน้าต่างสีครีม -->
+      <g fill="#efe7d8">
+        <path fill-rule="evenodd" d="M380 40H1240V740H380Z M410 70V710H1210V70Z"/>
+        <rect x="800" y="70" width="28" height="640"/>
+        <rect x="410" y="372" width="800" height="26"/>
+      </g>
+      <path d="M410 70H1210V710H410Z" fill="none" stroke="#b8ac96" stroke-width="2"/>
+      <path d="M800 70V710M828 70V710M410 372H1210M410 398H1210" stroke="#b8ac96" stroke-width="1.5" opacity=".7"/>
+      </g>
+
+      <!-- ชั้นหนังสือด้านซ้าย + ต้นไม้ห้อย -->
+      <rect x="0" y="0" width="300" height="560" fill="#2a1d14"/>
+      <g id="w-books"></g>
+      <g fill="#5d4330"><rect x="0" y="170" width="300" height="14"/><rect x="0" y="340" width="300" height="14"/><rect x="0" y="510" width="300" height="14"/></g>
+      <g fill="none">
+        <path d="M60 168C40 260 90 330 70 440" stroke="#1d2b21" stroke-width="3"/>
+        <path d="M60 168C40 260 90 330 70 440" stroke="#35523b" stroke-width="22" stroke-dasharray="1.2 7"/>
+        <path d="M150 168C170 240 120 310 150 400" stroke="#1d2b21" stroke-width="3"/>
+        <path d="M150 168C170 240 120 310 150 400" stroke="#35523b" stroke-width="22" stroke-dasharray="1.2 7"/>
+        <path d="M230 168C215 220 250 270 228 330" stroke="#1d2b21" stroke-width="3"/>
+        <path d="M230 168C215 220 250 270 228 330" stroke="#35523b" stroke-width="20" stroke-dasharray="1.2 7"/>
+      </g>
+      <g id="w-lights"></g>
+
+      <g transform="translate(330 0)">
+      <!-- ขอบหน้าต่าง + ของตกแต่ง -->
+      <rect x="330" y="736" width="960" height="30" rx="4" fill="#c4a67e"/>
+      <rect x="330" y="736" width="960" height="6" fill="#e0c9a3"/>
+      <rect x="350" y="766" width="920" height="34" fill="#7d5f40"/>
+
+      <!-- ต้นสนจิ๋ว -->
+      <polygon points="450,540 505,736 395,736" fill="#1f3a30"/>
+      <polygon points="450,540 505,736 450,736" fill="#16291f" opacity=".55"/>
+      <g fill="#f4f8ff"><circle cx="440" cy="590" r="4"/><circle cx="462" cy="620" r="3.5"/><circle cx="430" cy="650" r="4"/><circle cx="470" cy="665" r="3"/><circle cx="415" cy="700" r="4.5"/><circle cx="485" cy="705" r="4"/><circle cx="450" cy="690" r="3"/><circle cx="438" cy="722" r="3.5"/><circle cx="498" cy="724" r="3"/><circle cx="456" cy="570" r="3"/></g>
+      <g><circle class="bulb" cx="455" cy="610" r="3.5" fill="#ffe3a1"/><circle class="bulb" cx="425" cy="675" r="3.5" fill="#ffd36b"/><circle class="bulb" cx="480" cy="690" r="3.5" fill="#ffe3a1"/><circle class="bulb" cx="448" cy="640" r="3.5" fill="#ffd36b"/><circle class="bulb" cx="470" cy="720" r="3.5" fill="#ffe3a1"/></g>
+
+      <!-- บ้านจิ๋วมีไฟ -->
+      <circle cx="602" cy="690" r="80" fill="url(#w-glow)" opacity=".55"/>
+      <rect x="556" y="646" width="92" height="90" fill="#c9a77c"/>
+      <rect x="626" y="612" width="14" height="30" fill="#b99a73"/><rect x="623" y="608" width="20" height="7" rx="3" fill="#f4f8ff"/>
+      <polygon points="544,652 602,604 660,652" fill="#9c7a54"/>
+      <polygon points="548,648 602,602 656,648 640,650 602,618 564,650" fill="#f1f5fb"/>
+      <g fill="#ffcf7a"><rect x="568" y="664" width="18" height="22" rx="2"/><rect x="618" y="664" width="18" height="22" rx="2"/><rect x="568" y="700" width="18" height="22" rx="2"/><rect x="618" y="700" width="18" height="22" rx="2"/></g>
+      <rect x="595" y="704" width="18" height="32" fill="#7a5535"/>
+
+      <!-- โหลลูกอมไม้เท้า -->
+      <rect x="850" y="668" width="68" height="68" rx="8" fill="#fff" opacity=".12" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+      <use href="#w-cane" transform="translate(872 704) rotate(-8)"/><use href="#w-cane" transform="translate(888 704) rotate(4)"/><use href="#w-cane" transform="translate(900 706) rotate(15)"/>
+      <rect x="850" y="690" width="68" height="46" rx="8" fill="#fff" opacity=".1"/>
+
+      <!-- โคมเทียนตะเกียง -->
+      <circle cx="1030" cy="660" r="170" fill="url(#w-glow)" opacity=".6"/>
+      <rect x="990" y="722" width="80" height="14" fill="#e8e2d6"/>
+      <rect x="996" y="610" width="68" height="112" fill="#ffcf7a" opacity=".32"/>
+      <rect x="996" y="610" width="68" height="112" fill="none" stroke="#f1ece2" stroke-width="5"/>
+      <path d="M1013 610V722M1047 610V722" stroke="#f1ece2" stroke-width="3" opacity=".7"/>
+      <rect x="1016" y="668" width="28" height="54" rx="3" fill="#fff1cf"/>
+      <ellipse class="flame" cx="1030" cy="656" rx="7" ry="13" fill="#ffd36b"/><ellipse class="flame" cx="1030" cy="660" rx="3.5" ry="7" fill="#fff6d6"/>
+      <path d="M988 612Q1030 556 1072 612Z" fill="#f1ece2"/><rect x="1024" y="546" width="12" height="14" rx="4" fill="#f1ece2"/><circle cx="1030" cy="540" r="9" fill="none" stroke="#f1ece2" stroke-width="4"/>
+
+      <!-- เทียนแก้วใส -->
+      <circle cx="1172" cy="690" r="130" fill="url(#w-glow)" opacity=".6"/>
+      <rect x="1142" y="650" width="60" height="86" rx="8" fill="#e8a64a" opacity=".5" stroke="#fff" stroke-opacity=".45" stroke-width="2"/>
+      <rect x="1148" y="676" width="48" height="56" rx="4" fill="#ffd9a0" opacity=".92"/>
+      <ellipse class="flame" cx="1172" cy="664" rx="6" ry="12" fill="#ffd36b"/><ellipse class="flame" cx="1172" cy="668" rx="3" ry="6" fill="#fff6d6"/>
+
+      </g>
+
+      <!-- ผ้าห่มไหมพรม -->
+      <path d="M0 860Q200 800 420 826T820 836Q1000 846 1160 884T1600 904V1000H0Z" fill="#e9dcc8"/>
+      <path d="M0 860Q200 800 420 826T820 836Q1000 846 1160 884T1600 904V1000H0Z" fill="url(#w-stitch)" opacity=".7"/>
+      <path d="M0 860Q200 800 420 826T820 836Q1000 846 1160 884T1600 904" fill="none" stroke="#fffaf0" stroke-width="10" opacity=".5"/>
+
+      <!-- หมอนลายเกล็ดหิมะ -->
+      <g transform="rotate(-6 150 780)">
+        <rect x="-30" y="620" width="340" height="310" rx="44" fill="#efe6d6"/>
+        <rect x="-30" y="620" width="340" height="310" rx="44" fill="url(#w-stitch)" opacity=".35"/>
+        <use href="#w-flake" transform="translate(120 740)"/>
+        <use href="#w-flake" transform="translate(230 850) scale(.7)"/>
+      </g>
+
+      <g transform="translate(600 0)">
+      <!-- แก้วโกโก้วิปครีม -->
+      <ellipse cx="640" cy="934" rx="100" ry="22" fill="#8a6a45"/><ellipse cx="640" cy="928" rx="100" ry="20" fill="#a8825a"/>
+      <path d="M720 818q54 0 52 42q-2 38-52 38" fill="none" stroke="#f2ead9" stroke-width="16"/>
+      <path d="M560 806H720V884Q720 928 640 930Q560 928 560 884Z" fill="#f2ead9"/>
+      <path d="M560 806H720V884Q720 928 640 930Q560 928 560 884Z" fill="#000" opacity=".06"/>
+      <ellipse cx="640" cy="806" rx="80" ry="16" fill="#e6dccb"/>
+      <path d="M574 806q10-44 40-44q10-32 52-20q42 8 40 44q0 22-32 26H590Z" fill="#fff8ec"/>
+      <g fill="#7a4b2f" opacity=".6"><circle cx="610" cy="782" r="2.5"/><circle cx="640" cy="768" r="2.5"/><circle cx="670" cy="780" r="2.5"/><circle cx="652" cy="792" r="2"/><circle cx="626" cy="796" r="2"/></g>
+      <g fill="#2f4a38"><polygon points="606,846 620,884 592,884"/><polygon points="606,832 618,858 594,858"/><polygon points="672,842 688,886 656,886"/><polygon points="672,826 686,858 658,858"/></g>
+      <g class="steam" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round">
+        <path d="M612 744q-14-20 0-40q14-20 0-40"/><path d="M646 740q-14-20 0-40q14-20 0-40" style="animation-delay:-1.3s"/><path d="M680 744q-14-20 0-40q14-20 0-40" style="animation-delay:-2.6s"/>
+      </g>
+
+      </g>
+
+      <g transform="translate(-300 0)">
+      <!-- หนังสือภาพหิมะ -->
+      <polygon points="1010,926 1390,896 1470,986 1070,1006" fill="#c9d2dc"/>
+      <polygon points="1010,926 1070,1006 1070,1014 1008,934" fill="#efe9dc"/>
+      <polygon points="1070,1006 1470,986 1470,994 1070,1014" fill="#efe9dc"/>
+      <g fill="#6d7f86" opacity=".7"><polygon points="1150,960 1176,918 1202,962"/><polygon points="1210,954 1244,904 1278,956"/><polygon points="1290,948 1316,912 1342,950"/><polygon points="1180,985 1210,950 1240,985"/></g>
+      <polygon points="1010,926 1390,896 1470,986 1070,1006" fill="#fff" opacity=".08"/>
+      </g>
+    </svg>
+    <div class="bokeh" data-palette="warm" data-n="20"></div>
+  </div>
+
+  <!-- ===== ฉาก: หน้าต่างร้านค้า (กรอบดำ พวงหรีด โบแดง แสงโบเก้) ===== -->
+  <div class="set set-shop">
+    <svg class="art" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="s-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05070c"/><stop offset="1" stop-color="#0d121b"/></linearGradient>
+        <linearGradient id="s-room" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2d170f"/><stop offset=".6" stop-color="#1b0e09"/><stop offset="1" stop-color="#120807"/></linearGradient>
+        <radialGradient id="s-glow"><stop offset="0" stop-color="#ffc766" stop-opacity=".9"/><stop offset=".5" stop-color="#ff9a3a" stop-opacity=".3"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="s-glowR"><stop offset="0" stop-color="#ff5a4e" stop-opacity=".85"/><stop offset=".5" stop-color="#d3122e" stop-opacity=".25"/><stop offset="1" stop-color="#d3122e" stop-opacity="0"/></radialGradient>
+        <radialGradient id="s-spill" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff9a3a" stop-opacity=".35"/><stop offset="1" stop-color="#ff9a3a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="s-orb" cx=".38" cy=".33"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#ffc766"/><stop offset="1" stop-color="#d7822a"/></radialGradient>
+        <radialGradient id="s-red" cx=".35" cy=".3"><stop offset="0" stop-color="#ff8a8a"/><stop offset=".45" stop-color="#c8102e"/><stop offset="1" stop-color="#6d0715"/></radialGradient>
+        <clipPath id="s-clip"><rect x="456" y="96" width="688" height="678"/></clipPath>
+        <g id="s-bow" fill="#d3122e" stroke="#7a0a1a" stroke-width="2.5" stroke-linejoin="round">
+          <path d="M-6 6L-38 62L-16 54L-2 72L8 8Z"/><path d="M6 6L38 62L16 54L2 72L-8 8Z"/>
+          <path d="M0 0C-30 -36 -80 -32 -72 0C-66 28 -26 24 0 0Z"/><path d="M0 0C30 -36 80 -32 72 0C66 28 26 24 0 0Z"/>
+          <path d="M-56 -4C-44 -14 -24 -12 -12 -2M56 -4C44 -14 24 -12 12 -2" fill="none" stroke="#ff6b6b" stroke-opacity=".6" stroke-width="3"/>
+          <ellipse cx="0" cy="2" rx="14" ry="12"/>
+        </g>
+        <g id="s-bell">
+          <path d="M-26 0Q-26 -42 0 -48Q26 -42 26 0L36 12H-36Z" fill="#efe1c8" stroke="#a88f6a" stroke-width="2"/>
+          <path d="M-14 -34Q0 -42 14 -34M-20 -16H20" fill="none" stroke="#c8102e" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="0" cy="18" r="6" fill="#c8a86a"/>
+        </g>
+        <g id="s-flake" stroke="#f4f8ff" stroke-width="4" stroke-linecap="round" fill="none">
+          <path d="M0 -26V26M-22.5 -13L22.5 13M-22.5 13L22.5 -13"/>
+        </g>
+      </defs>
+
+      <rect width="1600" height="1000" fill="url(#s-wall)"/>
+      <g transform="translate(420 0)">
+      <ellipse cx="800" cy="440" rx="640" ry="520" fill="url(#s-spill)"/>
+
+      <!-- ภายในร้าน -->
+      <g clip-path="url(#s-clip)">
+        <rect x="456" y="96" width="688" height="678" fill="url(#s-room)"/>
+        <g id="s-bokeh"></g>
+
+        <!-- พวงมาลัยสนพาดบน + ลูกแก้ว (JS เติมลูกแก้ว) -->
+        <path d="M440 140Q800 240 1160 140" fill="none" stroke="#10281c" stroke-width="40"/>
+        <path d="M440 140Q800 240 1160 140" fill="none" stroke="#2a6a49" stroke-width="46" stroke-dasharray="1.3 6"/>
+        <g id="s-garland-top"></g>
+        <!-- พวงมาลัยด้านข้าง -->
+        <path d="M470 300Q520 470 470 650" fill="none" stroke="#10281c" stroke-width="34"/>
+        <path d="M470 300Q520 470 470 650" fill="none" stroke="#2a6a49" stroke-width="40" stroke-dasharray="1.3 6"/>
+        <path d="M1130 300Q1080 470 1130 650" fill="none" stroke="#10281c" stroke-width="34"/>
+        <path d="M1130 300Q1080 470 1130 650" fill="none" stroke="#2a6a49" stroke-width="40" stroke-dasharray="1.3 6"/>
+        <g fill="url(#s-red)"><circle cx="500" cy="400" r="11"/><circle cx="508" cy="520" r="11"/><circle cx="1100" cy="400" r="11"/><circle cx="1092" cy="520" r="11"/></g>
+
+        <!-- โคมไฟแขวน -->
+        <path d="M800 190V236" stroke="#8a6a3a" stroke-width="3"/>
+        <circle cx="800" cy="290" r="110" fill="url(#s-glow)"/>
+        <circle cx="800" cy="290" r="48" fill="url(#s-orb)"/>
+        <path d="M800 242V338M768 256Q752 290 768 324M832 256Q848 290 832 324M756 290H844" fill="none" stroke="#7a4a1a" stroke-width="3" opacity=".7"/>
+        <rect x="784" y="228" width="32" height="14" rx="4" fill="#8a6a3a"/>
+
+        <!-- พวงหรีดกลาง + โบแดง -->
+        <g transform="translate(800 456)">
+          <circle r="96" fill="url(#s-spill)" opacity=".7"/>
+          <circle r="88" fill="none" stroke="#10281c" stroke-width="32"/>
+          <circle r="88" fill="none" stroke="#2f7a52" stroke-width="40" stroke-dasharray="1.4 6"/>
+          <g fill="#d3122e"><circle cx="88" cy="0" r="6"/><circle cx="84" cy="9" r="5"/><circle cx="62" cy="62" r="6"/><circle cx="0" cy="88" r="6"/><circle cx="-8" cy="86" r="5"/><circle cx="-62" cy="62" r="6"/><circle cx="-88" cy="0" r="6"/><circle cx="-62" cy="-62" r="6"/><circle cx="62" cy="-62" r="6"/><circle cx="3" cy="-88" r="5"/></g>
+          <g fill="url(#s-orb)"><circle cx="76" cy="44" r="10"/><circle cx="-76" cy="44" r="10"/><circle cx="-76" cy="-44" r="10"/><circle cx="76" cy="-44" r="10"/><circle cx="0" cy="-88" r="9"/></g>
+          <g><circle class="bulb" cx="40" cy="80" r="3.5" fill="#fff3c4"/><circle class="bulb" cx="-40" cy="-80" r="3.5" fill="#fff3c4"/><circle class="bulb" cx="80" cy="-30" r="3.5" fill="#ffe3a1"/><circle class="bulb" cx="-82" cy="20" r="3.5" fill="#ffe3a1"/><circle class="bulb" cx="-30" cy="84" r="3.5" fill="#fff3c4"/><circle class="bulb" cx="34" cy="-84" r="3.5" fill="#ffe3a1"/></g>
+          <use href="#s-bow" transform="translate(0 -84) scale(.82)"/>
+        </g>
+
+        <!-- ลูกแก้วส้ม / โบเล็ก+เกล็ดหิมะ / กระดิ่ง -->
+        <circle cx="570" cy="432" r="70" fill="url(#s-glow)"/><circle cx="570" cy="432" r="38" fill="url(#s-orb)"/><path d="M570 396V300" stroke="#8a6a3a" stroke-width="2"/>
+        <use href="#s-flake" transform="translate(1030 392) scale(1.2)"/>
+        <use href="#s-bow" transform="translate(1030 470) scale(.5)"/>
+        <use href="#s-bell" transform="translate(580 660) scale(1.15)"/><use href="#s-bell" transform="translate(1020 668) scale(1.1)"/>
+        <g fill="url(#s-orb)"><circle cx="800" cy="706" r="22"/><circle cx="752" cy="724" r="18"/><circle cx="848" cy="722" r="18"/></g>
+        <g fill="url(#s-red)"><circle cx="776" cy="740" r="14"/><circle cx="826" cy="742" r="14"/></g>
+      </g>
+
+      <!-- กรอบหน้าต่างสีดำ + ซี่กระจก -->
+      <path fill-rule="evenodd" d="M430 70H1170V800H430Z M456 96V774H1144V96Z" fill="#05070b" stroke="#1c2536" stroke-width="2"/>
+      <g fill="#04060a">
+        <rect x="675" y="96" width="16" height="678"/><rect x="909" y="96" width="16" height="678"/>
+        <rect x="456" y="311" width="688" height="16"/><rect x="456" y="543" width="688" height="16"/>
+      </g>
+      <g fill="#dfe8f5" opacity=".9">
+        <rect x="456" y="306" width="688" height="6" rx="3"/><rect x="456" y="538" width="688" height="6" rx="3"/>
+        <rect x="430" y="64" width="740" height="8" rx="4"/><rect x="424" y="794" width="752" height="9" rx="4"/>
+        <rect x="672" y="90" width="22" height="5" rx="2.5"/><rect x="906" y="90" width="22" height="5" rx="2.5"/>
+      </g>
+
+      <!-- กล่องปลูกต้นไม้ด้านล่าง + พวงมาลัยโบแดง -->
+      <rect x="390" y="802" width="820" height="150" fill="#080b11"/>
+      <rect x="430" y="838" width="740" height="94" fill="none" stroke="#161e2c" stroke-width="3"/>
+      <path d="M380 826C540 796 700 860 800 826S1060 796 1220 826" fill="none" stroke="#0f2a1c" stroke-width="56"/>
+      <path d="M380 826C540 796 700 860 800 826S1060 796 1220 826" fill="none" stroke="#2f7a52" stroke-width="64" stroke-dasharray="1.4 6"/>
+      <g id="s-garland-bottom"></g>
+      <use href="#s-bow" transform="translate(520 832) scale(.9)"/><use href="#s-bow" transform="translate(800 836) scale(.9)"/><use href="#s-bow" transform="translate(1070 832) scale(.9)"/>
+
+      <!-- หลอดไฟแขวนด้านบน -->
+      <g fill="none" stroke="#14181f" stroke-width="3"><path d="M260 0Q380 46 470 24Q540 8 600 40"/><path d="M1000 40Q1060 8 1130 24Q1220 46 1340 0"/></g>
+      <g>
+        <circle cx="332" cy="46" r="64" fill="url(#s-glow)"/><circle cx="332" cy="46" r="13" fill="#ffe3a1"/>
+        <circle cx="474" cy="30" r="64" fill="url(#s-glow)"/><circle cx="474" cy="30" r="13" fill="#ffe3a1"/>
+        <circle cx="586" cy="48" r="64" fill="url(#s-glow)"/><circle cx="586" cy="48" r="13" fill="#ffe3a1"/>
+        <circle cx="1020" cy="50" r="64" fill="url(#s-glow)"/><circle cx="1020" cy="50" r="13" fill="#ffe3a1"/>
+        <circle cx="1130" cy="30" r="64" fill="url(#s-glow)"/><circle cx="1130" cy="30" r="13" fill="#ffe3a1"/>
+        <circle cx="1272" cy="46" r="64" fill="url(#s-glow)"/><circle cx="1272" cy="46" r="13" fill="#ffe3a1"/>
+      </g>
+      </g>
+    </svg>
+    <div class="bokeh" data-palette="warm" data-n="10"></div>
+  </div>
+
+  <!-- ===== ฉาก: เตาผิง (ถุงเท้าแดง ต้นคริสต์มาส ไฟอุ่น) ===== -->
+  <div class="set set-fireplace">
+    <svg class="art" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="f-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3c34"/><stop offset=".6" stop-color="#3d2924"/><stop offset="1" stop-color="#22140f"/></linearGradient>
+        <radialGradient id="f-fireglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff9a4a" stop-opacity=".6"/><stop offset=".5" stop-color="#ff7a3a" stop-opacity=".18"/><stop offset="1" stop-color="#ff7a3a" stop-opacity="0"/></radialGradient>
+        <linearGradient id="f-flameG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff4a12"/><stop offset=".5" stop-color="#ff9a2f"/><stop offset="1" stop-color="#ffe08a"/></linearGradient>
+        <linearGradient id="f-treeG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a6246"/><stop offset="1" stop-color="#0e271d"/></linearGradient>
+        <linearGradient id="f-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a2c1b"/><stop offset="1" stop-color="#1c0f09"/></linearGradient>
+        <radialGradient id="f-bulbG"><stop offset="0" stop-color="#fff3c4" stop-opacity=".9"/><stop offset="1" stop-color="#ffd36b" stop-opacity="0"/></radialGradient>
+        <radialGradient id="f-red" cx=".35" cy=".3"><stop offset="0" stop-color="#ff8a8a"/><stop offset=".45" stop-color="#b3202c"/><stop offset="1" stop-color="#5a0a14"/></radialGradient>
+        <pattern id="f-brick" width="60" height="30" patternUnits="userSpaceOnUse">
+          <rect width="60" height="30" fill="#7a4332"/>
+          <path d="M0 0H60M0 15H60M30 0V15M0 15V30M60 15V30" stroke="#3d2018" stroke-width="3" fill="none"/>
+        </pattern>
+        <g id="f-stock">
+          <path d="M-3 0V-18" stroke="#8c1b24" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M-26 0H26V120Q26 170 80 176Q106 180 100 204Q96 222 70 222H20Q-26 222 -26 170Z" fill="currentColor"/>
+          <path d="M-26 40H26" stroke="#000" stroke-opacity=".12" stroke-width="3"/>
+          <rect x="-34" y="-4" width="68" height="42" rx="10" fill="#f4ecdf"/>
+        </g>
+        <g id="f-bow" fill="#8c1b2c" stroke="#4d0b17" stroke-width="2" stroke-linejoin="round">
+          <path d="M-6 6L-30 50L-12 44L-2 60L8 8Z"/><path d="M6 6L30 50L12 44L2 60L-8 8Z"/>
+          <path d="M0 0C-26 -30 -64 -26 -58 0C-52 22 -22 20 0 0Z"/><path d="M0 0C26 -30 64 -26 58 0C52 22 22 20 0 0Z"/>
+          <ellipse cx="0" cy="2" rx="11" ry="10"/>
+        </g>
+      </defs>
+
+      <!-- ผนัง + พื้น -->
+      <rect width="1600" height="1000" fill="url(#f-wall)"/>
+      <ellipse cx="1100" cy="760" rx="900" ry="520" fill="url(#f-fireglow)" class="f-glow"/>
+
+      <!-- กรอบรูปบนผนังซ้าย -->
+      <rect x="150" y="250" width="210" height="270" rx="4" fill="#c9a66a" stroke="#7a5a2a" stroke-width="6"/>
+      <rect x="170" y="270" width="170" height="230" fill="#2a2f45"/>
+      <rect x="170" y="270" width="170" height="130" fill="#3b4666"/>
+      <g fill="#14201c"><polygon points="215,440 245,360 275,440"/><polygon points="255,445 292,350 330,445"/></g><polygon points="245,360 258,384 245,380 232,384" fill="#eaf1fa"/>
+      <rect x="170" y="440" width="170" height="60" fill="#d9e2ec" opacity=".85"/>
+
+      <g transform="translate(300 0)">
+      <!-- ชั้นเหนือเตา + กรอบเตา -->
+      <rect x="545" y="540" width="510" height="372" fill="#efe4d2"/>
+      <g fill="#d9ccb6"><rect x="568" y="562" width="12" height="322"/><rect x="590" y="562" width="12" height="322"/><rect x="1020" y="562" width="12" height="322"/><rect x="998" y="562" width="12" height="322"/></g>
+      <rect x="620" y="590" width="360" height="322" fill="url(#f-brick)"/>
+      <rect x="650" y="640" width="300" height="272" fill="#150b09"/>
+      <ellipse cx="800" cy="880" rx="150" ry="22" fill="#ff6a2a" opacity=".55"/>
+      <g>
+        <rect x="690" y="858" width="220" height="30" rx="14" fill="#3b2316" transform="rotate(-3 800 872)"/>
+        <rect x="715" y="836" width="170" height="26" rx="12" fill="#4a2c1b" transform="rotate(5 800 850)"/>
+        <g class="flame"><path d="M752 868C728 812 784 790 800 716C818 790 878 812 850 868Z" fill="url(#f-flameG)"/></g>
+        <g class="flame" style="animation-delay:-.6s"><path d="M716 868C704 828 740 818 746 772C762 816 784 834 770 868Z" fill="url(#f-flameG)"/></g>
+        <g class="flame" style="animation-delay:-1s"><path d="M836 868C830 832 862 816 868 776C882 818 904 836 890 868Z" fill="url(#f-flameG)"/></g>
+        <g class="flame" style="animation-delay:-.3s"><path d="M780 868C770 836 794 826 800 784C808 826 826 840 818 868Z" fill="#fff0b0" opacity=".9"/></g>
+      </g>
+      <rect x="585" y="908" width="430" height="26" fill="#2a1b16"/>
+      <rect x="480" y="490" width="640" height="34" rx="4" fill="#f2e8d8"/>
+      <rect x="500" y="524" width="600" height="14" fill="#d8cbb4"/>
+
+      <!-- พวงมาลัยสน + ไฟ + เทียนบนหิ้ง -->
+      <path d="M470 492Q800 548 1130 492" fill="none" stroke="#0f2a1c" stroke-width="40"/>
+      <path d="M470 492Q800 548 1130 492" fill="none" stroke="#2a6246" stroke-width="48" stroke-dasharray="1.3 6"/>
+      <g id="f-garland"></g>
+      <rect x="520" y="414" width="22" height="78" rx="3" fill="#f4ecdf"/><rect x="510" y="484" width="42" height="10" rx="3" fill="#c9a66a"/>
+      <circle cx="531" cy="396" r="40" fill="url(#f-bulbG)"/>
+      <ellipse class="flame" cx="531" cy="402" rx="6" ry="13" fill="#ffd36b"/><ellipse class="flame" cx="531" cy="406" rx="3" ry="7" fill="#fff6d6"/>
+
+      <!-- ถุงเท้าแขวนหน้าเตา -->
+      <use href="#f-stock" transform="translate(655 538) scale(.58)" style="color:#b3202c"/>
+      <use href="#f-stock" transform="translate(745 538) scale(.58)" style="color:#1f5a3f"/>
+      <use href="#f-stock" transform="translate(835 538) scale(.58)" style="color:#b3202c"/>
+      <use href="#f-stock" transform="translate(925 538) scale(.58)" style="color:#b3202c"/>
+      </g>
+
+      <g transform="translate(190 0)">
+      <!-- ต้นคริสต์มาสด้านขวา -->
+      <polygon points="1330,170 1410,380 1250,380" fill="url(#f-treeG)"/>
+      <polygon points="1330,290 1440,520 1220,520" fill="url(#f-treeG)"/>
+      <polygon points="1330,420 1470,680 1190,680" fill="url(#f-treeG)"/>
+      <polygon points="1330,550 1500,830 1160,830" fill="url(#f-treeG)"/>
+      <polygon points="1330,690 1540,962 1120,962" fill="url(#f-treeG)"/>
+      <g id="f-treeLights"></g>
+      <g fill="url(#f-red)">
+        <circle cx="1330" cy="260" r="13"/><circle cx="1262" cy="360" r="14"/><circle cx="1395" cy="440" r="14"/><circle cx="1260" cy="540" r="15"/>
+        <circle cx="1390" cy="630" r="15"/><circle cx="1250" cy="720" r="16"/><circle cx="1400" cy="790" r="16"/><circle cx="1320" cy="880" r="17"/><circle cx="1230" cy="880" r="16"/>
+      </g>
+      <use href="#f-bow" transform="translate(1330 470) scale(1.1)"/><use href="#f-bow" transform="translate(1320 700) scale(1.3)"/>
+      <circle cx="1330" cy="160" r="50" fill="url(#f-bulbG)"/>
+      <polygon points="1330,128 1339,152 1364,153 1344,168 1351,192 1330,178 1309,192 1316,168 1296,153 1321,152" fill="#ffd36b"/>
+
+      <!-- กล่องของขวัญ -->
+      <g>
+        <rect x="1110" y="888" width="110" height="80" fill="#efe3d0"/><rect x="1158" y="888" width="14" height="80" fill="#8c1b2c"/><rect x="1110" y="922" width="110" height="14" fill="#8c1b2c"/>
+        <rect x="1235" y="910" width="96" height="62" fill="#7d1a26"/><rect x="1275" y="910" width="12" height="62" fill="#d8b56a"/><rect x="1235" y="934" width="96" height="12" fill="#d8b56a"/>
+        <rect x="1348" y="896" width="120" height="76" fill="#efe3d0"/><rect x="1400" y="896" width="14" height="76" fill="#7d1a26"/><rect x="1348" y="930" width="120" height="14" fill="#7d1a26"/>
+        <rect x="1480" y="920" width="90" height="56" fill="#7d1a26"/><rect x="1517" y="920" width="12" height="56" fill="#d8b56a"/>
+        <use href="#f-bow" transform="translate(1165 884) scale(.5)"/><use href="#f-bow" transform="translate(1408 892) scale(.55)"/>
+      </g>
+      </g>
+
+      <!-- พื้นไม้ + โต๊ะข้าง -->
+      <rect x="0" y="930" width="1600" height="70" fill="url(#f-floor)"/>
+      <g stroke="#0e0705" stroke-opacity=".6" stroke-width="3"><path d="M0 955H1600M0 982H1600"/><path d="M140 930V955M420 930V955M700 930V955M980 930V955M300 955V982M580 955V982M860 955V982M120 982V1000M440 982V1000M760 982V1000"/></g>
+      <ellipse cx="1100" cy="945" rx="360" ry="22" fill="#ff8a3a" opacity=".25"/>
+      <g transform="translate(650 0)">
+      <ellipse cx="170" cy="800" rx="100" ry="18" fill="#5b3a24"/><rect x="164" y="814" width="12" height="130" fill="#4a2f1d"/><ellipse cx="170" cy="946" rx="60" ry="9" fill="#3a2418"/>
+      <rect x="120" y="738" width="56" height="60" rx="8" fill="#f2ead9"/><path d="M176 752q28 0 26 20q-2 20 -26 20" fill="none" stroke="#f2ead9" stroke-width="9"/>
+      <g class="steam" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"><path d="M138 724q-10-16 0-30q10-14 0-28"/><path d="M160 722q-10-16 0-30q10-14 0-28" style="animation-delay:-1.8s"/></g>
+      </g>
+    </svg>
+    <div class="bokeh" data-palette="warm" data-n="12"></div>
+  </div>
+
+  <!-- ===== ฉาก: ลูกบอลไฟ (ตึกยามเย็น กิ่งไม้ ลูกบอลไฟและลูกแก้วแดง) ===== -->
+  <div class="set set-lights">
+    <svg class="art" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="l-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f3d62"/><stop offset=".55" stop-color="#4d7799"/><stop offset="1" stop-color="#a9c0d0"/></linearGradient>
+        <linearGradient id="l-stone" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e2cba8"/><stop offset="1" stop-color="#b79b78"/></linearGradient>
+        <linearGradient id="l-glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d7c96"/><stop offset="1" stop-color="#2a3f55"/></linearGradient>
+        <radialGradient id="l-orb" cx=".4" cy=".35"><stop offset="0" stop-color="#fff6d4"/><stop offset=".6" stop-color="#f6c46a"/><stop offset="1" stop-color="#c98a2e"/></radialGradient>
+        <radialGradient id="l-halo"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset=".5" stop-color="#ffd98a" stop-opacity=".16"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+        <radialGradient id="l-red" cx=".32" cy=".28" r=".8"><stop offset="0" stop-color="#ff8a8a"/><stop offset=".35" stop-color="#d3122e"/><stop offset="1" stop-color="#5a0612"/></radialGradient>
+        <pattern id="l-dots" width="11" height="11" patternUnits="userSpaceOnUse"><circle cx="5.5" cy="5.5" r="2.1" fill="#fff9e0"/></pattern>
+        <g id="l-orbG">
+          <circle r="190" fill="url(#l-halo)"/>
+          <circle r="100" fill="url(#l-orb)"/>
+          <circle r="100" fill="url(#l-dots)" opacity=".9"/>
+          <circle r="100" fill="none" stroke="#ffe9a8" stroke-opacity=".5" stroke-width="3"/>
+        </g>
+        <g id="l-redG">
+          <rect x="-15" y="-112" width="30" height="18" rx="3" fill="#d8b56a"/><circle cy="-116" r="8" fill="none" stroke="#d8b56a" stroke-width="3"/>
+          <circle r="100" fill="url(#l-red)"/>
+          <ellipse cx="-36" cy="-44" rx="30" ry="18" fill="#fff" opacity=".55" transform="rotate(-35 -36 -44)"/>
+          <path d="M40 60Q10 82 -30 66" fill="none" stroke="#ff9a9a" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
+        </g>
+      </defs>
+
+      <rect width="1600" height="1000" fill="url(#l-sky)"/>
+      <!-- ตึกหินสีครีมส่องไฟ (หน้าต่าง/สายไฟสร้างจาก JS) -->
+      <g transform="translate(1600 0) scale(-1 1)">
+      <g id="l-facade" transform="skewY(-4)">
+        <rect x="-40" y="180" width="1160" height="1000" fill="url(#l-stone)"/>
+      </g>
+
+      <!-- กิ่งไม้เปลือย + สายไฟ (JS) -->
+      <g id="l-branches" fill="none" stroke-linecap="round"></g>
+      </g>
+
+      <!-- ลูกบอลไฟสีทอง และลูกแก้วแดง -->
+      <g stroke="#2a1c15" stroke-width="2" fill="none" opacity=".8"><path d="M820 -10V130M1100 -10V334M1450 -10V134M110 -10V623M1000 -10V784M1380 -10V257"/></g>
+      <use class="bulb" href="#l-orbG" transform="translate(1380 335) scale(.78)" style="animation-duration:3.4s"/>
+      <use class="bulb" href="#l-orbG" transform="translate(950 640) scale(.9)" style="animation-duration:4.1s;animation-delay:-1s"/>
+      <use class="bulb" href="#l-orbG" transform="translate(1190 850) scale(.56)" style="animation-duration:2.9s;animation-delay:-2s"/>
+      <use class="bulb" href="#l-orbG" transform="translate(190 760) scale(.66)" style="animation-duration:3.8s;animation-delay:-.6s"/>
+      <use class="bulb" href="#l-orbG" transform="translate(310 360) scale(.42)" style="animation-duration:3.1s;animation-delay:-1.7s"/>
+      <use href="#l-redG" transform="translate(820 252) scale(.7)"/>
+      <use href="#l-redG" transform="translate(1100 395) scale(.5)"/>
+      <use href="#l-redG" transform="translate(1450 190) scale(.46)"/>
+      <use href="#l-redG" transform="translate(110 690) scale(.55)"/>
+      <use href="#l-redG" transform="translate(1000 860) scale(.62)"/>
+    </svg>
+    <div class="bokeh" data-palette="gold" data-n="26"></div>
+  </div>
+
+  <!-- หิมะตก ใช้ร่วมกันทุกฉาก -->
+  <div id="snow" class="snow"></div>
 </div>
 
 <!-- ================= ตัวแอป ================= -->
@@ -231,7 +685,10 @@
         <p>Pomodoro · โฟกัสท่ามกลางหิมะ</p>
       </div>
     </div>
-    <button id="btnSettings" class="icon-btn" type="button" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-sliders"/></svg></button>
+    <div class="top-actions">
+      <button id="btnScene" class="icon-btn" type="button" aria-label="เปลี่ยนฉากหลัง"><svg class="ic"><use href="#i-image"/></svg></button>
+      <button id="btnSettings" class="icon-btn" type="button" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-sliders"/></svg></button>
+    </div>
   </header>
 
   <main class="stack">
@@ -331,6 +788,9 @@
   <!-- autofocus ที่กล่องเอง เพื่อให้เปิดมาแล้วเห็นหัวข้อด้านบนก่อน (ไม่เลื่อนไปที่ปุ่มล่างสุด) -->
   <div class="sheet" tabindex="-1" autofocus>
     <div class="card-head"><h2 id="setTitle">ตั้งค่า</h2></div>
+
+    <p class="label">ฉากหลัง</p>
+    <div id="sceneGrid" class="scene-grid" role="radiogroup" aria-label="เลือกฉากหลัง"></div>
 
     <div class="fields">
       <label>โฟกัส (นาที)<input id="setFocus" type="number" inputmode="numeric" min="1" max="180"></label>

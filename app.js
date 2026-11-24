@@ -51,7 +51,8 @@ const DEFAULTS = {
   autoMusic: true,                 // เล่นเพลงตอนโฟกัส หยุดตอนพัก
   bell: true,                      // เสียงกระดิ่งเมื่อจบรอบ
   wake: true,                      // กันหน้าจอดับตอนจับเวลา
-  motion: null                     // null = ตามระบบ, true/false = ผู้ใช้เลือกเอง
+  motion: null,                    // null = ตามระบบ, true/false = ผู้ใช้เลือกเอง
+  scene: 'london'                  // ฉากหลัง: london | window | shop | fireplace | lights
 };
 const settings = loadJSON(KEY.settings, DEFAULTS);
 function sanitizeSettings() {
@@ -764,6 +765,209 @@ function motionOff() {
 }
 function applyMotion() { document.documentElement.dataset.motion = motionOff() ? 'off' : 'on'; }
 
+
+/* ---------- ฉากหลังที่เลือกได้ ----------
+ * ทุกฉากวาดด้วย SVG/CSS เอง (ไม่ใช้รูปถ่าย) — ส่วนที่ซ้ำ ๆ เช่น หลอดไฟ หน้าต่างตึก
+ * ลูกแก้ว ให้ JS สร้างตอนเปิดฉากนั้นครั้งแรก เพื่อไม่ให้หน้าเว็บหนักโดยไม่จำเป็น */
+const SCENES = [
+  { id: 'london', name: 'ถนนลอนดอน', swatch: 'linear-gradient(180deg,#101e4c,#5b3f6e 68%,#a45a52)' },
+  { id: 'window', name: 'หน้าต่างหิมะ', swatch: 'linear-gradient(120deg,#8d6a43 0,#8d6a43 30%,#d4dde8 31%,#8296ab 70%,#46665f)' },
+  { id: 'shop', name: 'หน้าต่างร้านค้า', swatch: 'radial-gradient(circle at 50% 45%,#c8102e 0,#6a1a10 30%,#06080d 78%)' },
+  { id: 'fireplace', name: 'เตาผิง', swatch: 'radial-gradient(circle at 50% 78%,#ffb347 0,#8a3a26 36%,#2a1814 80%)' },
+  { id: 'lights', name: 'ลูกบอลไฟ', swatch: 'radial-gradient(circle at 30% 42%,#ffd98a 0,#4d7799 46%,#1f3d62 92%)' }
+];
+const builtScenes = new Set();
+
+// จุดบนเส้นโค้ง Bezier ลูกบาศก์ (p = 4 จุดควบคุม) และเส้นโค้งกำลังสอง
+function bez(p, t) {
+  const u = 1 - t;
+  return [0, 1].map((k) => u * u * u * p[0][k] + 3 * u * u * t * p[1][k] + 3 * u * t * t * p[2][k] + t * t * t * p[3][k]);
+}
+function quadPt(a, c, b, t) {
+  const u = 1 - t;
+  return [0, 1].map((k) => u * u * a[k] + 2 * u * t * c[k] + t * t * b[k]);
+}
+const bezPath = (p) => `M${p[0][0]} ${p[0][1]}C${p[1][0]} ${p[1][1]} ${p[2][0]} ${p[2][1]} ${p[3][0]} ${p[3][1]}`;
+
+// หลอดไฟดวงเดียว: วงแสงจาง ๆ + แกนสว่าง (กะพริบได้)
+function addBulb(parent, x, y, color, rnd, r = 4, animate = true) {
+  const g = svgEl('g', animate
+    ? { class: 'bulb', style: `animation-delay:${(-rnd() * 3).toFixed(2)}s;animation-duration:${(1.8 + rnd() * 2.2).toFixed(2)}s` }
+    : {}, parent);
+  svgEl('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: (r * 2.5).toFixed(1), fill: color, opacity: 0.2 }, g);
+  svgEl('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r, fill: color }, g);
+}
+function bulbsAlong(parent, p, n, colors, rnd, r = 4) {
+  for (let i = 0; i < n; i++) {
+    const [x, y] = bez(p, (i + 0.5) / n);
+    addBulb(parent, x, y, colors[Math.floor(rnd() * colors.length)], rnd, r, rnd() < 0.7);
+  }
+}
+
+// แสงโบเก้: วงกลมแสงฟุ้ง ๆ สุ่มตำแหน่ง ขยับช้า ๆ
+function buildBokeh(box, rnd) {
+  const palettes = { warm: ['255,196,102', '255,150,70', '255,224,160', '255,120,80'], gold: ['255,217,138', '255,236,190', '255,190,100', '255,130,120'] };
+  const pal = palettes[box.dataset.palette] || palettes.warm;
+  const n = Number(box.dataset.n) || 12;
+  for (let i = 0; i < n; i++) {
+    const b = document.createElement('i');
+    const s = 36 + rnd() * 120;
+    b.style.cssText = `--x:${(rnd() * 100).toFixed(1)}%;--y:${(rnd() * 100).toFixed(1)}%;--s:${s.toFixed(0)}px;` +
+      `--c:${pal[Math.floor(rnd() * pal.length)]};--o:${(0.18 + rnd() * 0.4).toFixed(2)};--d:${(3 + rnd() * 5).toFixed(1)}s;animation-delay:${(-rnd() * 6).toFixed(1)}s`;
+    box.append(b);
+  }
+}
+
+function buildWindowScene(rnd) {
+  // ชั้นหนังสือ: ไล่วางสันหนังสือสีต่าง ๆ ความสูงไม่เท่ากันบนชั้น 3 ชั้น
+  const books = $('#w-books');
+  const cols = ['#3b2a22', '#5a3326', '#2f3b34', '#6b4a2e', '#7a2f2a', '#2b2f45', '#8b7355', '#c9b48f', '#4a3a2a'];
+  for (const base of [170, 340, 510]) {
+    let x = 4;
+    while (x < 290) {
+      const w = 14 + rnd() * 16, h = 90 + rnd() * 55;
+      svgEl('rect', { x: x.toFixed(1), y: (base - h).toFixed(1), width: w.toFixed(1), height: h.toFixed(1), fill: cols[Math.floor(rnd() * cols.length)], rx: 1.5 }, books);
+      svgEl('rect', { x: (x + 2).toFixed(1), y: (base - h + 14).toFixed(1), width: (w - 4).toFixed(1), height: 3, fill: '#e8d6a8', opacity: 0.5 }, books);
+      x += w + 1.5;
+    }
+  }
+  // สายไฟประดับห้อยตามผนัง
+  const g = $('#w-lights');
+  const strands = [[[310, -10], [360, 150], [290, 330], [340, 560]], [[255, -10], [210, 130], [285, 270], [240, 440]]];
+  strands.forEach((p, i) => {
+    svgEl('path', { d: bezPath(p), fill: 'none', stroke: '#3a2a1c', 'stroke-width': 2 }, g);
+    bulbsAlong(g, p, i ? 12 : 16, ['#ffe3a1', '#ffd36b', '#fff3c4'], rnd, 4.2);
+  });
+}
+
+function buildShopScene(rnd) {
+  // แสงโบเก้ภายในร้าน
+  const bk = $('#s-bokeh');
+  for (let i = 0; i < 46; i++) {
+    const x = 456 + rnd() * 688, y = 96 + rnd() * 678, r = 5 + rnd() * 26, red = rnd() < 0.18;
+    svgEl('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: (r * 2.2).toFixed(0), fill: `url(#${red ? 's-glowR' : 's-glow'})`, opacity: (0.25 + rnd() * 0.5).toFixed(2) }, bk);
+    svgEl('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: (r * 0.5).toFixed(0), fill: red ? '#ff8a7a' : '#ffe3a1', opacity: (0.25 + rnd() * 0.3).toFixed(2) }, bk);
+  }
+  // ลูกแก้ว + ไฟบนพวงมาลัยด้านบน
+  const gt = $('#s-garland-top');
+  [0.08, 0.2, 0.32, 0.44, 0.56, 0.68, 0.8, 0.92].forEach((t, i) => {
+    const [x, y] = quadPt([440, 140], [800, 240], [1160, 140], t);
+    svgEl('circle', { cx: x.toFixed(0), cy: (y + 4).toFixed(0), r: 12, fill: i % 2 ? 'url(#s-orb)' : 'url(#s-red)' }, gt);
+    svgEl('circle', { cx: (x - 4).toFixed(0), cy: (y).toFixed(0), r: 3, fill: '#fff', opacity: 0.6 }, gt);
+  });
+  [0.14, 0.26, 0.38, 0.5, 0.62, 0.74, 0.86].forEach((t) => {
+    const [x, y] = quadPt([440, 140], [800, 240], [1160, 140], t);
+    addBulb(gt, x, y - 6, '#fff3c4', rnd, 3.5);
+  });
+  // กล่องปลูกต้นไม้ด้านล่าง: ผลเบอร์รีแดง หิมะ และไฟ
+  const gb = $('#s-garland-bottom');
+  for (let i = 0; i < 16; i++) {
+    svgEl('ellipse', { cx: (410 + rnd() * 780).toFixed(0), cy: (798 + rnd() * 14).toFixed(0), rx: (14 + rnd() * 18).toFixed(0), ry: (5 + rnd() * 5).toFixed(0), fill: '#eef3fb', opacity: 0.92 }, gb);
+  }
+  for (let i = 0; i < 38; i++) {
+    const x = 400 + rnd() * 800, y = 800 + rnd() * 40;
+    svgEl('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: (4 + rnd() * 3).toFixed(1), fill: '#d3122e' }, gb);
+    svgEl('circle', { cx: (x - 1.5).toFixed(1), cy: (y - 1.5).toFixed(1), r: 1.3, fill: '#fff', opacity: 0.6 }, gb);
+  }
+  for (let i = 0; i < 12; i++) addBulb(gb, 410 + rnd() * 780, 806 + rnd() * 36, '#ffe3a1', rnd, 3.2);
+}
+
+function buildFireplaceScene(rnd) {
+  // ไฟประดับบนพวงมาลัยหิ้งเตาผิง
+  const g = $('#f-garland');
+  for (let i = 0; i < 26; i++) {
+    const [x, y] = quadPt([470, 492], [800, 548], [1130, 492], (i + 0.5) / 26);
+    addBulb(g, x, y - 4 + rnd() * 8, rnd() < 0.2 ? '#ffb347' : '#fff3c4', rnd, 4, rnd() < 0.6);
+  }
+  // ไฟประดับต้นคริสต์มาส: สุ่มจุดภายในรูปทรงต้นไม้
+  const tl = $('#f-treeLights');
+  const tiers = [[170, 380, 80], [290, 520, 110], [420, 680, 140], [550, 830, 170], [690, 962, 210]];
+  for (let i = 0; i < 110; i++) {
+    const [top, bottom, hw] = tiers[Math.floor(rnd() * tiers.length)];
+    const y = top + (0.2 + rnd() * 0.8) * (bottom - top);
+    const half = hw * (y - top) / (bottom - top);
+    addBulb(tl, 1330 + (rnd() * 2 - 1) * half * 0.88, y, rnd() < 0.15 ? '#ffd36b' : '#fff3c4', rnd, 3.1, rnd() < 0.5);
+  }
+}
+
+function buildLightsScene(rnd) {
+  // ผนังตึกหินครีม: บัวคาดชั้น + หน้าต่าง (บางบานเปิดไฟ) + สายไฟตามบัว
+  const f = $('#l-facade');
+  const bands = [190, 410, 630, 850];
+  for (const by of bands) {
+    svgEl('rect', { x: -40, y: by, width: 1160, height: 30, fill: '#f0dfbf' }, f);
+    svgEl('rect', { x: -40, y: by + 30, width: 1160, height: 8, fill: '#8f7752', opacity: 0.45 }, f);
+    if (by === 850) continue;
+    for (let c = 0; c < 8; c++) {
+      const x = 30 + c * 135, y = by + 74, w = 78, h = 120;
+      svgEl('rect', { x: x - 9, y: y - 9, width: w + 18, height: h + 18, rx: 6, fill: '#f3e6cc' }, f);
+      const lit = rnd() < 0.42;
+      svgEl('rect', { x, y, width: w, height: h, rx: 3, fill: lit ? '#ffcf7a' : 'url(#l-glass)', opacity: lit ? 0.9 : 1 }, f);
+      if (!lit) svgEl('polygon', { points: `${x},${y} ${x + w * 0.55},${y} ${x},${y + h * 0.6}`, fill: '#cfe3f2', opacity: 0.18 }, f);
+      svgEl('path', { d: `M${x + w / 2} ${y}V${y + h}M${x} ${y + h * 0.45}H${x + w}`, stroke: lit ? '#d9a950' : '#e8d9b6', 'stroke-width': 4, fill: 'none' }, f);
+    }
+    for (let x = -10; x < 1110; x += 30) addBulb(f, x, by + 46, rnd() < 0.2 ? '#ffb347' : '#ffe3a1', rnd, 3.4, rnd() < 0.5);
+  }
+  // กิ่งไม้เปลือย + หลอดไฟพันกิ่ง
+  const br = $('#l-branches');
+  const limbs = [
+    { w: 34, p: [[-30, -30], [60, 140], [120, 260], [140, 430]] }, { w: 20, p: [[84, 170], [260, 150], [420, 200], [600, 110]] },
+    { w: 15, p: [[600, 110], [660, 80], [720, 90], [820, 30]] }, { w: 18, p: [[120, 330], [280, 300], [420, 340], [640, 300]] },
+    { w: 12, p: [[300, 170], [330, 100], [350, 50], [380, -10]] }, { w: 12, p: [[480, 200], [520, 260], [560, 300], [640, 300]] },
+    { w: 22, p: [[1000, -20], [1030, 60], [1090, 120], [1180, 150]] }, { w: 14, p: [[1180, 150], [1260, 170], [1330, 160], [1440, 220]] },
+    { w: 12, p: [[1090, 120], [1120, 200], [1110, 260], [1160, 320]] }
+  ];
+  for (const L of limbs) svgEl('path', { d: bezPath(L.p), stroke: '#2a1c15', 'stroke-width': L.w }, br);
+  for (const L of limbs) bulbsAlong(br, L.p, L.w > 16 ? 11 : 7, ['#ffe3a1', '#ffd36b', '#fff3c4'], rnd, 3.6);
+}
+
+function buildScene(id) {
+  if (builtScenes.has(id)) return;
+  builtScenes.add(id);
+  const set = document.querySelector(`.set-${id}`);
+  if (!set) return;
+  const rnd = mulberry32(id.length * 977 + id.charCodeAt(0));
+  const bokeh = set.querySelector('.bokeh');
+  if (bokeh) buildBokeh(bokeh, rnd);
+  const fn = { window: buildWindowScene, shop: buildShopScene, fireplace: buildFireplaceScene, lights: buildLightsScene }[id];
+  if (fn) fn(rnd);
+}
+
+// จอแนวตั้ง (มือถือ) เห็นภาพแค่แถบแคบ ๆ ตรงกลาง — เลื่อนไปทางขวาที่เป็นจุดเด่นของฉาก
+const portraitMQ = window.matchMedia('(max-aspect-ratio: 1/1)');
+function fitArt() {
+  document.querySelectorAll('.set .art').forEach((svg) => {
+    svg.setAttribute('preserveAspectRatio', portraitMQ.matches ? 'xMaxYMid slice' : 'xMidYMid slice');
+  });
+}
+if (portraitMQ.addEventListener) portraitMQ.addEventListener('change', fitArt);
+
+function applyScene() {
+  fitArt();
+  if (!SCENES.some((s) => s.id === settings.scene)) settings.scene = 'london';
+  document.querySelector('.scene').dataset.scene = settings.scene;
+  document.body.dataset.scene = settings.scene;
+  buildScene(settings.scene);
+  document.querySelectorAll('.scene-opt').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.id === settings.scene)));
+}
+function chooseScene(id) {
+  settings.scene = id;
+  saveJSON(KEY.settings, settings);
+  applyScene();
+}
+function buildSceneGrid() {
+  const grid = $('#sceneGrid');
+  for (const sc of SCENES) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'scene-opt'; b.dataset.id = sc.id; b.setAttribute('role', 'radio');
+    const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = sc.swatch;
+    const nm = document.createElement('span'); nm.textContent = sc.name;
+    b.append(sw, nm);
+    b.addEventListener('click', () => chooseScene(sc.id));
+    grid.append(b);
+  }
+}
+
 /* ---------- 7) หน้าตั้งค่า + PWA ---------- */
 const dlg = $('#settingsDlg');
 const inputs = { focus: $('#setFocus'), short: $('#setShort'), long: $('#setLong'), every: $('#setEvery') };
@@ -828,6 +1032,12 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ---------- 8) ปุ่มหลัก + เริ่มต้นการทำงาน ---------- */
+$('#btnScene').addEventListener('click', () => {
+  const i = SCENES.findIndex((x) => x.id === settings.scene);
+  const next = SCENES[(i + 1) % SCENES.length];
+  chooseScene(next.id);
+  toast(`ฉากหลัง: ${next.name}`);
+});
 el.start.addEventListener('click', toggleTimer);
 $('#btnReset').addEventListener('click', resetTimer);
 $('#btnSkip').addEventListener('click', () => finishPhase(false));
@@ -838,6 +1048,8 @@ document.addEventListener('visibilitychange', () => { tick(); updateWake(); rend
 window.addEventListener('pagehide', persist);
 
 applyMotion();
+buildSceneGrid();
+applyScene();
 buildSnow();
 buildLights();
 buildSkyline();

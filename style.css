@@ -77,9 +77,20 @@ h1, h2, p { margin: 0; }
 .scene::after {
   content: ''; position: absolute; inset: 0;
   background-color: var(--tint);
+  background-image: linear-gradient(180deg, rgba(4, 6, 16, .5) 0%, rgba(4, 6, 16, 0) 24%, rgba(4, 6, 16, 0) 70%, rgba(4, 6, 16, .32) 100%);
   transition: background-color 1.4s ease;
 }
-.scene > * { position: absolute; }
+.scene > *, .set > * { position: absolute; }
+
+/* แต่ละฉากอยู่ใน .set — แสดงเฉพาะฉากที่เลือก (data-scene บน .scene)
+ * ฉากที่ซ่อนจะไม่ถูกเรนเดอร์ และแอนิเมชันของมันไม่ทำงาน จึงไม่กินเครื่อง */
+.set { inset: 0; display: none; }
+.scene[data-scene="london"]    .set-london,
+.scene[data-scene="window"]    .set-window,
+.scene[data-scene="shop"]      .set-shop,
+.scene[data-scene="fireplace"] .set-fireplace,
+.scene[data-scene="lights"]    .set-lights { display: block; }
+.art { inset: 0; width: 100%; height: 100%; }
 
 .stars, .stars.s2 { inset: 0 0 38% 0; background-repeat: no-repeat; animation: twinkle 4.5s ease-in-out infinite alternate; }
 .stars {
@@ -183,6 +194,26 @@ h1, h2, p { margin: 0; }
 
 .lights { top: 0; left: 0; width: 100%; height: clamp(64px, 12vh, 112px); }
 
+/* ---------- ฉากใหม่: แสงโบเก้ ไฟกะพริบ เปลวไฟ ไอน้ำร้อน ---------- */
+.bokeh { inset: 0; overflow: hidden; }
+.bokeh i {
+  position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--c), .8) 0, rgba(var(--c), .38) 52%, rgba(var(--c), 0) 72%);
+  opacity: var(--o); animation: bokeh var(--d) ease-in-out infinite alternate;
+}
+@keyframes bokeh { from { transform: scale(.82); opacity: calc(var(--o) * .35); } to { transform: scale(1.1); opacity: var(--o); } }
+
+.flame { transform-box: fill-box; transform-origin: 50% 100%; animation: flame 1.5s ease-in-out infinite; }
+@keyframes flame {
+  0%, 100% { transform: scale(1, 1) skewX(0deg); }
+  30% { transform: scale(.92, 1.1) skewX(3deg); }
+  60% { transform: scale(1.06, .94) skewX(-3deg); }
+}
+.f-glow { animation: fflick 2.4s ease-in-out infinite alternate; }
+@keyframes fflick { from { opacity: .72; } to { opacity: 1; } }
+.steam path { animation: steam 4s ease-in-out infinite; opacity: 0; }
+@keyframes steam { 0% { transform: translateY(10px); opacity: 0; } 30% { opacity: .45; } 100% { transform: translateY(-28px); opacity: 0; } }
+
 /* ============================================================
  * 3) โครงหน้า + การ์ดกระจกฝ้า
  * ============================================================ */
@@ -198,6 +229,12 @@ h1, h2, p { margin: 0; }
   display: flex; flex-direction: column; gap: 16px;
 }
 .stack { display: flex; flex-direction: column; gap: 16px; }
+
+/* จอกว้าง + ฉากใหม่: ชิดแผงไปทางซ้าย เพื่อให้เห็นจุดเด่นของฉากที่อยู่ฝั่งขวา */
+.app { transition: margin .6s ease; }
+@media (min-width: 1000px) {
+  body:not([data-scene="london"]) .app { margin-left: clamp(24px, 5vw, 96px); margin-right: auto; }
+}
 
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
@@ -230,6 +267,17 @@ h1, h2, p { margin: 0; }
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   transition: transform .15s, background .2s;
 }
+.top-actions { display: flex; gap: 10px; flex: none; }
+.label { font-size: .82rem; color: var(--ink-dim); margin: 2px 0 8px; }
+.scene-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.scene-opt {
+  display: flex; flex-direction: column; gap: 8px; padding: 8px 8px 10px; cursor: pointer; text-align: left;
+  border-radius: 18px; background: rgba(255, 255, 255, .06); border: 1px solid var(--line); font-size: .88rem; font-weight: 600;
+  transition: transform .15s, border-color .2s, background .2s;
+}
+.scene-opt .sw { display: block; height: 54px; border-radius: 12px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15); }
+.scene-opt[aria-checked="true"] { border-color: var(--gold); background: rgba(242, 196, 109, .16); }
+.scene-opt:active { transform: scale(.97); }
 .icon-btn:active, .ctl:active, .pbtn:active, .chip:active { transform: scale(.94); }
 
 .chip {
