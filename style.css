@@ -23,9 +23,13 @@
   --line: rgba(255, 255, 255, .16);
   --radius: 26px;
   --g: clamp(64px, 11vh, 108px);            /* ความสูงพื้นถนน/ทางเท้า */
-  /* ฟอนต์ระบบที่รองรับภาษาไทยในทุกแพลตฟอร์ม */
-  --font: "Sukhumvit Set", "Thonburi", "Noto Sans Thai", "Leelawadee UI", "Tahoma",
-          "Sarabun", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* ฟอนต์สไตล์อังกฤษ: เซริฟคลาสสิกแบบหนังสือเก่าของลอนดอน (ตัวอักษรอังกฤษและตัวเลข)
+   * ทั้งหมดเป็นฟอนต์ที่มากับระบบ ไม่ต้องดาวน์โหลด — ภาษาไทยจะตกไปใช้ฟอนต์ไทยของระบบต่อท้ายรายการ
+   * ลำดับ: Mac/iOS → Windows → Android → Linux */
+  --font: "Baskerville", "Baskerville Old Face", "Palatino", "Palatino Linotype", "Book Antiqua",
+          "Times New Roman", "Noto Serif", "Liberation Serif", "DejaVu Serif",
+          "Sukhumvit Set", "Thonburi", "Noto Sans Thai", "Leelawadee UI", "Tahoma",
+          "Sarabun", system-ui, -apple-system, "Segoe UI", Roboto, serif;
 }
 
 /* ธีมสีเปลี่ยนตามช่วงเวลา */
@@ -272,7 +276,7 @@ body[data-running="true"] .ring-wrap::before { opacity: .3; animation: breathe 3
 .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 22%; }
 .time {
   font-size: clamp(3.1rem, 15vw, 4.6rem); font-weight: 300; line-height: 1.05; letter-spacing: .02em;
-  font-variant-numeric: tabular-nums; text-shadow: 0 2px 22px rgba(0, 0, 0, .5);
+  font-variant-numeric: lining-nums tabular-nums; text-shadow: 0 2px 22px rgba(0, 0, 0, .5);
 }
 .phase { margin-top: 6px; font-weight: 600; font-size: .95rem; color: var(--gold-soft); }
 .round { font-size: .8rem; color: var(--ink-dim); }
@@ -308,7 +312,7 @@ body[data-running="true"] .ring-wrap::before { opacity: .3; animation: breathe 3
  * ============================================================ */
 .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .tile { background: rgba(0, 0, 0, .22); border: 1px solid rgba(255, 255, 255, .1); border-radius: 18px; padding: 12px 8px; text-align: center; }
-.tile b { display: block; font-size: 1.5rem; font-weight: 700; color: var(--gold-soft); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile b { display: block; font-size: 1.5rem; font-weight: 700; color: var(--gold-soft); font-variant-numeric: lining-nums tabular-nums; line-height: 1.2; }
 .tile span { font-size: .75rem; color: var(--ink-dim); }
 
 .bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 108px; margin-top: 16px; }
@@ -323,7 +327,7 @@ body[data-running="true"] .ring-wrap::before { opacity: .3; animation: breathe 3
  * ============================================================ */
 .now { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
 .now-title { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.now-time { flex: none; font-size: .8rem; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+.now-time { flex: none; font-size: .8rem; color: var(--ink-dim); font-variant-numeric: lining-nums tabular-nums; }
 
 /* สไลเดอร์ (ตำแหน่งเพลง / ระดับเสียง) — JS ตั้งค่า --fill ให้ */
 .range { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; margin: 0; background: transparent; cursor: pointer; --fill: 0%; }
@@ -368,7 +372,7 @@ body[data-running="true"] .ring-wrap::before { opacity: .3; animation: breathe 3
 .track-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .93rem; }
 .track-size { display: block; font-size: .72rem; color: var(--ink-faint); }
 .track-text { min-width: 0; }
-.track-idx { flex: none; width: 22px; text-align: center; font-size: .8rem; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+.track-idx { flex: none; width: 22px; text-align: center; font-size: .8rem; color: var(--ink-faint); font-variant-numeric: lining-nums tabular-nums; }
 .mini { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; cursor: pointer; background: transparent; border: 0; color: var(--ink-dim); }
 .mini:hover { background: rgba(255, 255, 255, .12); }
 .mini:disabled { opacity: .25; cursor: default; }
