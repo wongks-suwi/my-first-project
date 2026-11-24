@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <!-- viewport-fit=cover ทำให้เนื้อหาเต็มจอบน iPhone แล้วเราค่อยเว้นขอบด้วย safe-area ใน CSS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pomodoro · ลอนดอน คริสต์มาส</title>
+  <meta name="description" content="แอป Pomodoro ธีมคริสต์มาสลอนดอน ใช้งานออฟไลน์ได้ ไม่มีโฆษณา">
+  <meta name="theme-color" content="#0b1633">
+
+  <!-- PWA: manifest + ไอคอน + โหมดเต็มจอบน iOS -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pomodoro">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-mode="focus" data-running="false" data-playing="false">
+
+<!-- ชุดไอคอน (sprite) วาดเองด้วย SVG เรียกใช้ด้วย <use href="#i-...."> -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1.2" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M5 5l10 7-10 7z" fill="currentColor" stroke="none"/><rect x="17" y="5" width="2.6" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M19 5L9 12l10 7z" fill="currentColor" stroke="none"/><rect x="4.4" y="5" width="2.6" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1"/><path d="M3.5 4.5v4.8h4.8"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3 7h3.5c4 0 5 10 9.5 10H20"/><path d="M3 17h3.5c1.6 0 2.7-1 3.6-2.3M13.4 9.3C14.3 8 15.2 7 17 7h3"/><path d="M17.5 4.5L20 7l-2.5 2.5M17.5 14.5L20 17l-2.5 2.5"/></symbol>
+  <symbol id="i-loop" viewBox="0 0 24 24"><path d="M4 11V9.5A3.5 3.5 0 0 1 7.5 6H20"/><path d="M17 3l3 3-3 3"/><path d="M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H4"/><path d="M7 21l-3-3 3-3"/></symbol>
+  <symbol id="i-loop1" viewBox="0 0 24 24"><path d="M4 11V9.5A3.5 3.5 0 0 1 7.5 6H20"/><path d="M17 3l3 3-3 3"/><path d="M20 13v1.5a3.5 3.5 0 0 1-3.5 3.5H4"/><path d="M7 21l-3-3 3-3"/><path d="M11 10.8l1.4-1v5.6"/></symbol>
+  <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12,2 14.9,8.6 22,9.3 16.6,14 18.2,21 12,17.3 5.8,21 7.4,14 2,9.3 9.1,8.6" fill="currentColor" stroke="none"/></symbol>
+</svg>
+
+<!-- ================= ฉากหลัง London Christmas (SVG + CSS ล้วน) ================= -->
+<div class="scene" aria-hidden="true">
+  <div class="stars"></div>
+  <div class="stars s2"></div>
+  <div class="moon"></div>
+  <div class="glow"></div>
+
+  <!-- แนวตึกไกล ๆ (สร้างจาก JS เพื่อให้มีหน้าต่างไฟสุ่ม) -->
+  <svg id="skyline" class="skyline" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax slice"></svg>
+
+  <!-- หอนาฬิกาสไตล์อังกฤษ -->
+  <svg class="tower" viewBox="0 0 120 420">
+    <defs>
+      <linearGradient id="stone" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#232a55"/><stop offset=".55" stop-color="#3a3a66"/><stop offset="1" stop-color="#171c3c"/>
+      </linearGradient>
+      <linearGradient id="stoneGlow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffb066" stop-opacity="0"/><stop offset="1" stop-color="#ffb066" stop-opacity=".4"/>
+      </linearGradient>
+      <radialGradient id="faceGlow"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".85"/><stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/></radialGradient>
+      <radialGradient id="faceFill"><stop offset="0" stop-color="#fff6d6"/><stop offset="1" stop-color="#f3d58a"/></radialGradient>
+    </defs>
+    <path d="M60 1V24" stroke="#d8b25e" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="60" cy="3" r="2.4" fill="#f2c46d"/>
+    <polygon points="26,72 94,72 66,22 54,22" fill="#1b2147"/>
+    <polygon points="60,22 66,22 94,72 60,72" fill="#2a3166" opacity=".65"/>
+    <polygon points="22,72 31,72 26.5,50" fill="#1b2147"/>
+    <polygon points="89,72 98,72 93.5,50" fill="#1b2147"/>
+    <rect x="24" y="72" width="72" height="84" fill="url(#stone)"/>
+    <rect x="19" y="67" width="82" height="8" fill="#171c3c"/>
+    <rect x="19" y="152" width="82" height="8" fill="#171c3c"/>
+    <circle cx="60" cy="114" r="42" fill="url(#faceGlow)"/>
+    <circle cx="60" cy="114" r="27" fill="#c9a24a"/>
+    <circle cx="60" cy="114" r="23.5" fill="url(#faceFill)"/>
+    <circle cx="60" cy="114" r="20" fill="none" stroke="#5b4630" stroke-width="3" stroke-dasharray="1.2 9.27"/>
+    <line id="hHand" x1="60" y1="114" x2="60" y2="104" stroke="#2a2340" stroke-width="3" stroke-linecap="round"/>
+    <line id="mHand" x1="60" y1="114" x2="60" y2="97" stroke="#2a2340" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="60" cy="114" r="2.4" fill="#2a2340"/>
+    <rect x="32" y="160" width="56" height="260" fill="url(#stone)"/>
+    <rect x="32" y="160" width="56" height="260" fill="url(#stoneGlow)"/>
+    <path d="M46 160V420M60 160V420M74 160V420" stroke="#fff" stroke-opacity=".05"/>
+    <path d="M54 212V196a6 6 0 0 1 12 0V212Z" fill="#ffd98a" opacity=".85"/>
+    <path d="M54 272V256a6 6 0 0 1 12 0V272Z" fill="#ffd98a" opacity=".7"/>
+    <path d="M54 332V316a6 6 0 0 1 12 0V332Z" fill="#ffd98a" opacity=".85"/>
+    <rect x="30" y="232" width="60" height="4" fill="#171c3c"/>
+    <rect x="30" y="292" width="60" height="4" fill="#171c3c"/>
+    <rect x="30" y="352" width="60" height="4" fill="#171c3c"/>
+    <rect x="26" y="404" width="68" height="16" fill="#171c3c"/>
+  </svg>
+
+  <div class="ground"></div>
+
+  <!-- ต้นคริสต์มาส -->
+  <svg class="tree" viewBox="0 0 140 210">
+    <defs>
+      <linearGradient id="pine" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a8a63"/><stop offset="1" stop-color="#0f4231"/></linearGradient>
+      <radialGradient id="starGlow"><stop offset="0" stop-color="#ffe9a8" stop-opacity=".9"/><stop offset="1" stop-color="#ffe9a8" stop-opacity="0"/></radialGradient>
+    </defs>
+    <rect x="62" y="196" width="16" height="14" fill="#4a2f22"/>
+    <polygon points="70,132 132,200 8,200" fill="url(#pine)"/>
+    <polygon points="70,92 122,170 18,170" fill="url(#pine)"/>
+    <polygon points="70,52 110,122 30,122" fill="url(#pine)"/>
+    <polygon points="70,24 98,78 42,78" fill="url(#pine)"/>
+    <!-- หิมะเกาะกิ่ง -->
+    <polygon points="70,24 80,43 70,40 60,43" fill="#eef4ff" opacity=".92"/>
+    <polygon points="70,52 84,78 70,72 56,78" fill="#eef4ff" opacity=".92"/>
+    <polygon points="70,92 88,124 70,117 52,124" fill="#eef4ff" opacity=".92"/>
+    <polygon points="70,132 92,164 70,156 48,164" fill="#eef4ff" opacity=".92"/>
+    <!-- ไฟประดับ + ลูกแก้ว -->
+    <g>
+      <circle class="bulb" cx="64" cy="52" r="3" fill="#ffd36b"/><circle class="bulb" cx="78" cy="62" r="3" fill="#ff5a6e"/>
+      <circle class="bulb" cx="56" cy="70" r="3" fill="#fff3c4"/><circle class="bulb" cx="86" cy="72" r="3" fill="#ffd36b"/>
+      <circle class="bulb" cx="58" cy="92" r="3" fill="#ff5a6e"/><circle class="bulb" cx="80" cy="98" r="3" fill="#ffd36b"/>
+      <circle class="bulb" cx="48" cy="110" r="3" fill="#fff3c4"/><circle class="bulb" cx="92" cy="110" r="3" fill="#ff5a6e"/>
+      <circle class="bulb" cx="60" cy="130" r="3" fill="#ffd36b"/><circle class="bulb" cx="84" cy="136" r="3" fill="#fff3c4"/>
+      <circle class="bulb" cx="42" cy="152" r="3" fill="#ff5a6e"/><circle class="bulb" cx="100" cy="152" r="3" fill="#ffd36b"/>
+      <circle class="bulb" cx="70" cy="150" r="3" fill="#fff3c4"/><circle class="bulb" cx="30" cy="190" r="3" fill="#ffd36b"/>
+      <circle class="bulb" cx="60" cy="184" r="3" fill="#ff5a6e"/><circle class="bulb" cx="88" cy="188" r="3" fill="#fff3c4"/>
+      <circle class="bulb" cx="112" cy="190" r="3" fill="#ffd36b"/><circle class="bulb" cx="76" cy="172" r="3" fill="#ffd36b"/>
+    </g>
+    <circle cx="68" cy="108" r="4.5" fill="#c8102e"/><circle cx="66.6" cy="106.6" r="1.3" fill="#fff" opacity=".7"/>
+    <circle cx="52" cy="140" r="4.5" fill="#f2c46d"/><circle cx="50.6" cy="138.6" r="1.3" fill="#fff" opacity=".8"/>
+    <circle cx="90" cy="160" r="4.5" fill="#c8102e"/><circle cx="88.6" cy="158.6" r="1.3" fill="#fff" opacity=".7"/>
+    <circle cx="44" cy="180" r="4.5" fill="#f2c46d"/><circle cx="42.6" cy="178.6" r="1.3" fill="#fff" opacity=".8"/>
+    <circle cx="100" cy="182" r="4.5" fill="#c8102e"/><circle cx="98.6" cy="180.6" r="1.3" fill="#fff" opacity=".7"/>
+    <!-- ดาวยอดต้น -->
+    <circle cx="70" cy="14" r="17" fill="url(#starGlow)"/>
+    <polygon points="70,4 72.47,10.6 79.51,10.91 73.99,15.3 75.88,22.09 70,18.2 64.12,22.09 66.01,15.3 60.49,10.91 67.53,10.6" fill="#ffd36b"/>
+  </svg>
+
+  <!-- โคมไฟถนนวินเทจ 2 ต้น -->
+  <svg class="lamp lamp-a" viewBox="0 0 70 240">
+    <defs><radialGradient id="lampGlow"><stop offset="0" stop-color="#ffd27a" stop-opacity=".8"/><stop offset=".5" stop-color="#ffb347" stop-opacity=".22"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient></defs>
+    <circle class="lamp-glow" cx="35" cy="40" r="38" fill="url(#lampGlow)"/>
+    <path d="M22 240h26l-4-18H26z" fill="#0d1226"/>
+    <rect x="33" y="60" width="4" height="166" fill="#10162e"/>
+    <rect x="29" y="196" width="12" height="6" rx="2" fill="#10162e"/>
+    <rect x="29" y="72" width="12" height="5" rx="2" fill="#10162e"/>
+    <path d="M25 22h20l-4 36H29z" fill="#ffd98a"/>
+    <path d="M35 22v36M25 22l4 36M45 22l-4 36" stroke="#10162e" stroke-width="1.6"/>
+    <rect x="26" y="58" width="18" height="4" rx="1" fill="#10162e"/>
+    <path d="M20 22h30L35 7z" fill="#10162e"/>
+    <path d="M26 19Q35 4 44 19Q35 15 26 19Z" fill="#eef4ff" opacity=".92"/>
+    <circle cx="35" cy="5" r="3" fill="#10162e"/>
+  </svg>
+  <svg class="lamp lamp-b" viewBox="0 0 70 240">
+    <circle class="lamp-glow" cx="35" cy="40" r="38" fill="url(#lampGlow)"/>
+    <path d="M22 240h26l-4-18H26z" fill="#0d1226"/>
+    <rect x="33" y="60" width="4" height="166" fill="#10162e"/>
+    <rect x="29" y="196" width="12" height="6" rx="2" fill="#10162e"/>
+    <rect x="29" y="72" width="12" height="5" rx="2" fill="#10162e"/>
+    <path d="M25 22h20l-4 36H29z" fill="#ffd98a"/>
+    <path d="M35 22v36M25 22l4 36M45 22l-4 36" stroke="#10162e" stroke-width="1.6"/>
+    <rect x="26" y="58" width="18" height="4" rx="1" fill="#10162e"/>
+    <path d="M20 22h30L35 7z" fill="#10162e"/>
+    <path d="M26 19Q35 4 44 19Q35 15 26 19Z" fill="#eef4ff" opacity=".92"/>
+    <circle cx="35" cy="5" r="3" fill="#10162e"/>
+  </svg>
+
+  <!-- รถบัสสองชั้นสีแดง วิ่งผ่านช้า ๆ (หันหน้าไปทางขวา) -->
+  <svg class="bus" viewBox="0 0 300 130">
+    <defs>
+      <linearGradient id="busRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3213a"/><stop offset="1" stop-color="#a50d24"/></linearGradient>
+      <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff3c4" stop-opacity=".55"/><stop offset="1" stop-color="#fff3c4" stop-opacity="0"/></linearGradient>
+    </defs>
+    <ellipse cx="130" cy="127" rx="126" ry="3.5" fill="#000" opacity=".35"/>
+    <g class="bus-body">
+      <polygon points="252,92 300,74 300,124 252,104" fill="url(#beam)"/>
+      <rect x="10" y="16" width="228" height="52" rx="12" fill="url(#busRed)"/>
+      <rect x="6" y="60" width="250" height="54" rx="8" fill="url(#busRed)"/>
+      <rect x="6" y="62" width="250" height="4" fill="#f2c46d" opacity=".9"/>
+      <rect x="16" y="18" width="216" height="3" rx="1.5" fill="#fff" opacity=".25"/>
+      <!-- หน้าต่างชั้นบน (มีผู้โดยสารเงา ๆ) -->
+      <g fill="#ffe2a0">
+        <rect x="22" y="26" width="20" height="24" rx="4"/><rect x="48" y="26" width="20" height="24" rx="4"/>
+        <rect x="74" y="26" width="20" height="24" rx="4"/><rect x="100" y="26" width="20" height="24" rx="4"/>
+        <rect x="126" y="26" width="20" height="24" rx="4"/><rect x="152" y="26" width="20" height="24" rx="4"/>
+        <rect x="178" y="26" width="20" height="24" rx="4"/><rect x="204" y="26" width="20" height="24" rx="4"/>
+      </g>
+      <g fill="#6a2f33" opacity=".75">
+        <circle cx="58" cy="38" r="4.6"/><rect x="53" y="42" width="10" height="8" rx="2"/>
+        <circle cx="136" cy="38" r="4.6"/><rect x="131" y="42" width="10" height="8" rx="2"/>
+        <circle cx="188" cy="38" r="4.6"/><rect x="183" y="42" width="10" height="8" rx="2"/>
+      </g>
+      <!-- หน้าต่างชั้นล่าง ประตู กระจกหน้า -->
+      <g fill="#ffe2a0">
+        <rect x="20" y="74" width="26" height="22" rx="4"/><rect x="52" y="74" width="26" height="22" rx="4"/>
+        <rect x="84" y="74" width="26" height="22" rx="4"/><rect x="116" y="74" width="26" height="22" rx="4"/>
+        <rect x="222" y="70" width="26" height="30" rx="5"/>
+      </g>
+      <rect x="160" y="72" width="40" height="40" rx="4" fill="#ffd98a" opacity=".9"/>
+      <path d="M180 72v40" stroke="#a50d24" stroke-width="2.5"/>
+      <!-- ซุ้มล้อ + ล้อ -->
+      <circle cx="62" cy="114" r="18" fill="#1a0d12"/><circle cx="206" cy="114" r="18" fill="#1a0d12"/>
+      <g class="wheel" style="transform-origin:62px 112px"><circle cx="62" cy="112" r="14" fill="#14141c"/><circle cx="62" cy="112" r="6.5" fill="#8d93a8"/><path d="M62 106.5v11M56.5 112h11" stroke="#14141c" stroke-width="2"/></g>
+      <g class="wheel" style="transform-origin:206px 112px"><circle cx="206" cy="112" r="14" fill="#14141c"/><circle cx="206" cy="112" r="6.5" fill="#8d93a8"/><path d="M206 106.5v11M200.5 112h11" stroke="#14141c" stroke-width="2"/></g>
+      <!-- ไฟ + พวงหรีดหน้ารถ + ไฟประดับหลังคา -->
+      <circle cx="254" cy="92" r="9" fill="#fff3c4" opacity=".35"/><circle cx="254" cy="92" r="4" fill="#fff6c8"/>
+      <rect x="4" y="90" width="3.5" height="9" rx="1" fill="#ff3b3b"/>
+      <circle cx="248" cy="104" r="7" fill="none" stroke="#1f6b4f" stroke-width="4"/>
+      <circle cx="244" cy="100" r="1.8" fill="#ff3b3b"/><circle cx="252" cy="104" r="1.8" fill="#ff3b3b"/>
+      <path d="M14 14q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0q11 9 22 0" fill="none" stroke="#0e3a2b" stroke-width="1.2"/>
+      <g>
+        <circle class="bulb" cx="25" cy="19" r="2.6" fill="#ffd36b"/><circle class="bulb" cx="47" cy="19" r="2.6" fill="#fff3c4"/>
+        <circle class="bulb" cx="69" cy="19" r="2.6" fill="#ffd36b"/><circle class="bulb" cx="91" cy="19" r="2.6" fill="#fff3c4"/>
+        <circle class="bulb" cx="113" cy="19" r="2.6" fill="#ffd36b"/><circle class="bulb" cx="135" cy="19" r="2.6" fill="#fff3c4"/>
+        <circle class="bulb" cx="157" cy="19" r="2.6" fill="#ffd36b"/><circle class="bulb" cx="179" cy="19" r="2.6" fill="#fff3c4"/>
+        <circle class="bulb" cx="201" cy="19" r="2.6" fill="#ffd36b"/><circle class="bulb" cx="223" cy="19" r="2.6" fill="#fff3c4"/>
+      </g>
+    </g>
+  </svg>
+
+  <div id="snow" class="snow"></div>
+
+  <!-- สายไฟประดับด้านบน (หลอดไฟสร้างจาก JS) -->
+  <svg id="lights" class="lights" viewBox="0 0 1200 110" preserveAspectRatio="xMidYMin slice">
+    <path d="M-20 12Q100 74 220 12Q340 74 460 12Q580 74 700 12Q820 74 940 12Q1060 74 1180 12Q1300 74 1420 12" fill="none" stroke="#0a1230" stroke-width="2.2"/>
+  </svg>
+</div>
+
+<!-- ================= ตัวแอป ================= -->
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <span class="brand-mark"><svg class="ic"><use href="#i-star"/></svg></span>
+      <div>
+        <h1>ลอนดอน คริสต์มาส</h1>
+        <p>Pomodoro · โฟกัสท่ามกลางหิมะ</p>
+      </div>
+    </div>
+    <button id="btnSettings" class="icon-btn" type="button" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-sliders"/></svg></button>
+  </header>
+
+  <main class="stack">
+    <!-- ---------- ตัวจับเวลา ---------- -->
+    <section class="card timer-card" aria-label="ตัวจับเวลา">
+      <div class="modes" role="group" aria-label="เลือกช่วงเวลา">
+        <button class="mode-btn" type="button" data-mode="focus" aria-pressed="true">โฟกัส</button>
+        <button class="mode-btn" type="button" data-mode="short" aria-pressed="false">พักสั้น</button>
+        <button class="mode-btn" type="button" data-mode="long" aria-pressed="false">พักยาว</button>
+      </div>
+
+      <div class="ring-wrap">
+        <svg class="ring" viewBox="0 0 300 300" aria-hidden="true">
+          <defs>
+            <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" style="stop-color:var(--accent-a)"/>
+              <stop offset="1" style="stop-color:var(--accent-b)"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-ticks" cx="150" cy="150" r="108"/>
+          <circle class="ring-track" cx="150" cy="150" r="130"/>
+          <circle id="ringProg" class="ring-prog" cx="150" cy="150" r="130" stroke="url(#ringGrad)" transform="rotate(-90 150 150)"/>
+          <g id="ringHead" class="ring-head"><circle cx="150" cy="20" r="10"/><circle cx="150" cy="20" r="4.2" fill="#fff"/></g>
+        </svg>
+        <div class="ring-center">
+          <div id="time" class="time" role="timer" aria-live="off">25:00</div>
+          <div id="phaseLabel" class="phase">ช่วงโฟกัส</div>
+          <div id="roundLabel" class="round">รอบที่ 1 จาก 4</div>
+        </div>
+      </div>
+
+      <div id="pips" class="pips" aria-hidden="true"></div>
+
+      <div class="controls">
+        <button id="btnReset" class="ctl" type="button"><svg class="ic"><use href="#i-reset"/></svg><span>รีเซ็ต</span></button>
+        <button id="btnStart" class="primary" type="button"><svg class="ic"><use href="#i-play"/></svg><span id="startLabel">เริ่ม</span></button>
+        <button id="btnSkip" class="ctl" type="button"><svg class="ic"><use href="#i-next"/></svg><span>ข้าม</span></button>
+      </div>
+    </section>
+
+    <!-- ---------- สถิติ ---------- -->
+    <section class="card" aria-labelledby="statsTitle">
+      <div class="card-head"><h2 id="statsTitle">สถิติของคุณ</h2><span id="statTotal" class="muted"></span></div>
+      <div class="tiles">
+        <div class="tile"><b id="statRounds">0</b><span>รอบวันนี้</span></div>
+        <div class="tile"><b id="statMinutes">0</b><span>นาทีโฟกัส</span></div>
+        <div class="tile"><b id="statStreak">0</b><span>วันต่อเนื่อง</span></div>
+      </div>
+      <div id="bars" class="bars" aria-label="จำนวนรอบ 7 วันล่าสุด"></div>
+    </section>
+
+    <!-- ---------- เครื่องเล่นเพลง ---------- -->
+    <section class="card music-card" aria-labelledby="musicTitle">
+      <div class="card-head">
+        <h2 id="musicTitle">เพลงของฉัน <span id="trackCount" class="muted"></span></h2>
+        <button id="btnAdd" class="chip" type="button"><svg class="ic"><use href="#i-plus"/></svg>เพิ่มเพลง</button>
+        <input id="fileInput" class="sr-only" type="file" accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.flac" multiple tabindex="-1">
+      </div>
+
+      <div class="now">
+        <div id="nowTitle" class="now-title">ยังไม่ได้เลือกเพลง</div>
+        <div class="now-time"><span id="curTime">0:00</span> / <span id="durTime">0:00</span></div>
+      </div>
+      <input id="seek" class="range" type="range" min="0" max="1000" value="0" aria-label="ตำแหน่งในเพลง">
+
+      <div class="player-controls">
+        <button id="btnShuffle" class="pbtn" type="button" aria-pressed="false" aria-label="สลับสุ่ม"><svg class="ic"><use href="#i-shuffle"/></svg></button>
+        <button id="btnPrev" class="pbtn" type="button" aria-label="เพลงก่อนหน้า"><svg class="ic"><use href="#i-prev"/></svg></button>
+        <button id="btnPlay" class="pbtn big" type="button" aria-label="เล่น/หยุดเพลง"><svg class="ic"><use href="#i-play"/></svg></button>
+        <button id="btnNext" class="pbtn" type="button" aria-label="เพลงถัดไป"><svg class="ic"><use href="#i-next"/></svg></button>
+        <button id="btnLoop" class="pbtn" type="button" aria-label="เล่นวน"><svg class="ic"><use href="#i-loop"/></svg></button>
+      </div>
+
+      <div class="volume">
+        <svg class="ic"><use href="#i-volume"/></svg>
+        <input id="volume" class="range" type="range" min="0" max="100" value="80" aria-label="ระดับเสียงเพลง">
+      </div>
+
+      <label class="switch-row">
+        <span>เริ่มเพลงอัตโนมัติตอนโฟกัส<br><small>และหยุดเพลงตอนพัก</small></span>
+        <input id="optAutoMusic" class="switch" type="checkbox" role="switch">
+      </label>
+
+      <ul id="playlist" class="playlist"></ul>
+      <p id="emptyList" class="empty"><svg class="ic"><use href="#i-music"/></svg><span>เพิ่มไฟล์เพลง (mp3 / m4a / wav) จากเครื่องของคุณ<br>เพลงจะถูกเก็บไว้ในเครื่อง เล่นออฟไลน์ได้</span></p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="offlineBadge" class="badge" hidden>✓ พร้อมใช้งานออฟไลน์</span>
+    <span>ไม่มีโฆษณา · ข้อมูลทั้งหมดอยู่ในเครื่องของคุณ</span>
+  </footer>
+</div>
+
+<!-- ================= หน้าต่างตั้งค่า ================= -->
+<dialog id="settingsDlg" aria-labelledby="setTitle">
+  <!-- autofocus ที่กล่องเอง เพื่อให้เปิดมาแล้วเห็นหัวข้อด้านบนก่อน (ไม่เลื่อนไปที่ปุ่มล่างสุด) -->
+  <div class="sheet" tabindex="-1" autofocus>
+    <div class="card-head"><h2 id="setTitle">ตั้งค่า</h2></div>
+
+    <div class="fields">
+      <label>โฟกัส (นาที)<input id="setFocus" type="number" inputmode="numeric" min="1" max="180"></label>
+      <label>พักสั้น (นาที)<input id="setShort" type="number" inputmode="numeric" min="1" max="60"></label>
+      <label>พักยาว (นาที)<input id="setLong" type="number" inputmode="numeric" min="1" max="120"></label>
+      <label>พักยาวทุก (รอบ)<input id="setEvery" type="number" inputmode="numeric" min="2" max="8"></label>
+    </div>
+
+    <label class="switch-row"><span>เริ่มช่วงถัดไปอัตโนมัติ</span><input id="setAutoNext" class="switch" type="checkbox" role="switch"></label>
+    <label class="switch-row"><span>เสียงกระดิ่งเมื่อจบรอบ</span><input id="setBell" class="switch" type="checkbox" role="switch"></label>
+    <label class="switch-row"><span>กันหน้าจอดับขณะจับเวลา</span><input id="setWake" class="switch" type="checkbox" role="switch"></label>
+    <label class="switch-row"><span>ฉากเคลื่อนไหว (หิมะ · รถบัส)</span><input id="setMotion" class="switch" type="checkbox" role="switch"></label>
+
+    <div class="btn-row">
+      <button id="btnTestBell" class="chip" type="button">🔔 ทดลองเสียงกระดิ่ง</button>
+      <button id="btnInstall" class="chip" type="button" hidden>ติดตั้งแอป</button>
+      <button id="btnClearStats" class="chip danger" type="button">ล้างสถิติ</button>
+    </div>
+    <p class="hint">บน iPhone: กดปุ่มแชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม” เพื่อติดตั้งแอป</p>
+
+    <button id="btnCloseSettings" class="primary slim" type="button">เสร็จสิ้น</button>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<audio id="audio" preload="metadata" playsinline></audio>
+
+<noscript><p style="position:relative;z-index:2;padding:24px;color:#fff">ต้องเปิดใช้งาน JavaScript เพื่อใช้แอปนี้</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>
