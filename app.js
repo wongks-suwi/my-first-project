@@ -33,6 +33,22 @@ function saveJSON(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) { /* เก็บไม่ได้ก็ข้ามไป */ }
 }
 
+// กล่องยืนยันในหน้าเอง คืนค่า Promise<boolean> (ใช้แทน confirm() ที่บางสภาพแวดล้อมบล็อกไว้)
+function askConfirm(message, yesLabel = 'ตกลง') {
+  const d = $('#confirmDlg');
+  if (typeof d.showModal !== 'function') return Promise.resolve(window.confirm(message));
+  return new Promise((resolve) => {
+    $('#confirmMsg').textContent = message;
+    $('#confirmYes').textContent = yesLabel;
+    d.returnValue = '';
+    d.addEventListener('close', () => resolve(d.returnValue === 'yes'), { once: true });
+    d.showModal();
+  });
+}
+$('#confirmYes').addEventListener('click', () => $('#confirmDlg').close('yes'));
+$('#confirmNo').addEventListener('click', () => $('#confirmDlg').close('no'));
+$('#confirmDlg').addEventListener('click', (e) => { if (e.target === $('#confirmDlg')) $('#confirmDlg').close('no'); });   // แตะนอกกล่อง = ยกเลิก
+
 // ข้อความแจ้งเตือนเล็ก ๆ ด้านล่างจอ
 let toastTimer;
 function toast(msg) {
@@ -438,7 +454,7 @@ async function addFiles(fileList) {
 
 async function removeTrack(id) {
   const t = P.tracks[idxOf(id)];
-  if (!t || !confirm(`ลบเพลง “${t.name}” ออกจากเครื่องเล่น?`)) return;
+  if (!t || !(await askConfirm(`ลบเพลง “${t.name}” ออกจากเครื่องเล่น?`, 'ลบเพลง'))) return;
   try { await dbRun('readwrite', (s) => s.delete(id)); } catch (_) { toast('ลบเพลงไม่สำเร็จ'); return; }
   if (id === P.currentId) {
     audio.pause();
@@ -1023,8 +1039,8 @@ $('#setGlass').addEventListener('input', (e) => {
   applyGlass();
 });
 $('#btnTestBell').addEventListener('click', () => { unlockAudio(); ringBell(true); });
-$('#btnClearStats').addEventListener('click', () => {
-  if (!confirm('ล้างสถิติทั้งหมดในเครื่องนี้?')) return;
+$('#btnClearStats').addEventListener('click', async () => {
+  if (!(await askConfirm('ล้างสถิติทั้งหมดในเครื่องนี้?', 'ล้างสถิติ'))) return;
   stats.days = {}; saveJSON(KEY.stats, stats); renderStats(); toast('ล้างสถิติแล้ว');
 });
 

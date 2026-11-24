@@ -819,6 +819,17 @@
   </div>
 </dialog>
 
+<!-- กล่องยืนยันในหน้าเอง (ใช้แทน confirm() ของเบราว์เซอร์ ซึ่งบางที่ถูกบล็อก) -->
+<dialog id="confirmDlg" aria-labelledby="confirmMsg">
+  <div class="sheet" tabindex="-1" autofocus>
+    <p id="confirmMsg" class="confirm-msg"></p>
+    <div class="btn-row confirm-row">
+      <button id="confirmNo" class="chip" type="button">ยกเลิก</button>
+      <button id="confirmYes" class="chip danger" type="button">ตกลง</button>
+    </div>
+  </div>
+</dialog>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <audio id="audio" preload="metadata" playsinline></audio>
 

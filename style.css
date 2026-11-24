@@ -469,6 +469,8 @@ dialog::backdrop { background: rgba(3, 7, 20, .62); -webkit-backdrop-filter: blu
   background: rgba(0, 0, 0, .3); border: 1px solid var(--line); width: 100%;
 }
 .btn-row { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 0 4px; border-top: 1px solid rgba(255, 255, 255, .1); }
+.confirm-msg { font-size: 1.02rem; line-height: 1.5; margin: 4px 0 14px; overflow-wrap: anywhere; }
+.confirm-row { border-top: 0; justify-content: flex-end; padding-top: 0; }
 .hint { font-size: .78rem; color: var(--ink-faint); margin: 6px 0 4px; }
 
 .toast {
