@@ -52,7 +52,8 @@ const DEFAULTS = {
   bell: true,                      // เสียงกระดิ่งเมื่อจบรอบ
   wake: true,                      // กันหน้าจอดับตอนจับเวลา
   motion: null,                    // null = ตามระบบ, true/false = ผู้ใช้เลือกเอง
-  scene: 'london'                  // ฉากหลัง: london | window | shop | fireplace | lights
+  scene: 'london',                 // ฉากหลัง: london | window | shop | fireplace | lights
+  glass: 45                        // ความโปร่งใสของแผง 0–80 (%) ยิ่งมากยิ่งเห็นฉากหลังชัด
 };
 const settings = loadJSON(KEY.settings, DEFAULTS);
 function sanitizeSettings() {
@@ -61,6 +62,8 @@ function sanitizeSettings() {
   settings.short = num(settings.short, 5, 1, 60);
   settings.long = num(settings.long, 15, 1, 120);
   settings.every = num(settings.every, 4, 2, 8);
+  settings.glass = clamp(Math.round(Number(settings.glass)), 0, 80);
+  if (Number.isNaN(settings.glass)) settings.glass = DEFAULTS.glass;
 }
 sanitizeSettings();
 
@@ -763,6 +766,16 @@ function updateClock() {
 function motionOff() {
   return settings.motion === null ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : !settings.motion;
 }
+// ความโปร่งใสของแผง: ยิ่งโปร่ง ยิ่งลดการเบลอลงด้วย เพื่อให้เห็นรายละเอียดของฉากหลัง
+function applyGlass() {
+  const alpha = 0.7 * (1 - settings.glass / 100);
+  const root = document.documentElement.style;
+  root.setProperty('--glass-a', alpha.toFixed(3));
+  root.setProperty('--blur', `${(4 + alpha * 28).toFixed(0)}px`);
+  const input = $('#setGlass');
+  input.value = settings.glass; fillRange(input);
+  $('#glassVal').textContent = `${settings.glass}%`;
+}
 function applyMotion() { document.documentElement.dataset.motion = motionOff() ? 'off' : 'on'; }
 
 
@@ -1004,6 +1017,11 @@ bindSwitch('#setMotion', 'motion', applyMotion);
 $('#optAutoMusic').checked = settings.autoMusic;
 bindSwitch('#optAutoMusic', 'autoMusic', syncMusic);
 
+$('#setGlass').addEventListener('input', (e) => {
+  settings.glass = Number(e.target.value);
+  saveJSON(KEY.settings, settings);
+  applyGlass();
+});
 $('#btnTestBell').addEventListener('click', () => { unlockAudio(); ringBell(true); });
 $('#btnClearStats').addEventListener('click', () => {
   if (!confirm('ล้างสถิติทั้งหมดในเครื่องนี้?')) return;
@@ -1048,6 +1066,7 @@ document.addEventListener('visibilitychange', () => { tick(); updateWake(); rend
 window.addEventListener('pagehide', persist);
 
 applyMotion();
+applyGlass();
 buildSceneGrid();
 applyScene();
 buildSnow();
